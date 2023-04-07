@@ -1,0 +1,17 @@
+.drag-box {
+    width: 100px;
+    height: 50px;
+    outline: dashed 1px lightskyblue;
+    background-color: aquamarine;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: 0.5s;
+}
+
+.lander {
+    position: absolute;
+    background-color: bisque;
+    outline: dashed 1px lightskyblue;
+    transition: 0.5s;
+}
