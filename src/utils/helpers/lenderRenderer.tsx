@@ -1,4 +1,8 @@
 import React from "react";
+import { rightColumnChecker } from "./rightColumnChecker";
+import { topRowChecker } from "./topRowChecker";
+import { middleRowChecker } from "./middleRowChecker";
+import { bottomRowChecker } from "./bottomRowChecker";
 
 export const landerRenderer = (
   lander: HTMLElement,
@@ -15,41 +19,53 @@ export const landerRenderer = (
   const left50 = 50;
   const right50 = width - 50;
   const border = 2;
+  const rightColumn = width * perc07;
+  const bottomRow = height * perc09;
 
   if (
-    event.clientX >= width * perc07 &&
-    event.clientX >= left50 &&
-    event.clientX <= right50 &&
-    (event.clientY <= halfHeight ||
-      (event.clientY >= halfHeight && event.clientY < height * perc09))
+    rightColumnChecker(
+      event.clientX,
+      event.clientY,
+      rightColumn,
+      halfHeight,
+      left50,
+      right50,
+      bottomRow
+    )
   ) {
     lander.style.width = "50%";
     lander.style.height = "100%";
     lander.style.top = "0";
     lander.style.left = "50%";
   } else if (
-    event.clientX >= halfWidth * perc06 &&
-    event.clientX <= right50 &&
-    event.clientY <= halfHeight
+    topRowChecker(
+      event.clientX,
+      event.clientY,
+      halfWidth * perc06,
+      halfHeight,
+      right50
+    )
   ) {
     lander.style.width = "100%";
     lander.style.height = "50%";
     lander.style.top = "0";
     lander.style.left = "0";
   } else if (
-    event.clientX >= halfWidth * perc06 &&
-    event.clientX <= right50 &&
-    event.clientY >= halfHeight &&
-    event.clientY <= height * perc09
+    middleRowChecker(
+      event.clientX,
+      event.clientY,
+      halfWidth * perc06,
+      halfHeight,
+      right50,
+      bottomRow
+    )
   ) {
     lander.style.width = "100%";
     lander.style.height = "50%";
     lander.style.top = "50%";
     lander.style.left = "0";
   } else if (
-    event.clientX >= left50 &&
-    event.clientX <= right50 &&
-    event.clientY >= height * perc09
+    bottomRowChecker(event.clientX, event.clientY, left50, right50, bottomRow)
   ) {
     lander.style.width = "100%";
     lander.style.height = "10%";
