@@ -13,5 +13,6 @@
     position: absolute;
     background-color: bisque;
     outline: dashed 1px lightskyblue;
-    transition: 0.5s;
+    transition: 0.3s;
+    z-index: -1;
 }

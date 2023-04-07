@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { DragBox } from "../DragBox/DragBox";
 import "./DropBoard.scss";
-import { landerRenderer } from "../../utils/helpers/LanderRenderer";
+import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 
 export const DropBoard = () => {
   const dropArea = useRef<HTMLDivElement>(null);
