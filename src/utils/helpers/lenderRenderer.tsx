@@ -34,9 +34,9 @@ export const landerRenderer = (
     )
   ) {
     lander.style.width = "50%";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = "50%";
+    lander.style.height = `${height - 4}px`;
+    lander.style.top = "1px";
+    lander.style.left = `${width * 0.5 - 2}px`;
   } else if (
     topRowChecker(
       event.clientX,
@@ -46,10 +46,10 @@ export const landerRenderer = (
       right50
     )
   ) {
-    lander.style.width = "100%";
+    lander.style.width = `${width - 4}px`;
     lander.style.height = "50%";
-    lander.style.top = "0";
-    lander.style.left = "0";
+    lander.style.top = "1px";
+    lander.style.left = "1px";
   } else if (
     middleRowChecker(
       event.clientX,
@@ -60,31 +60,31 @@ export const landerRenderer = (
       bottomRow
     )
   ) {
-    lander.style.width = "100%";
+    lander.style.width = `${width - 4}px`;
     lander.style.height = "50%";
-    lander.style.top = "50%";
-    lander.style.left = "0";
+    lander.style.top = `${height * 0.5 - 2}px`;
+    lander.style.left = "1px";
   } else if (
     bottomRowChecker(event.clientX, event.clientY, left50, right50, bottomRow)
   ) {
-    lander.style.width = "100%";
-    lander.style.height = "10%";
+    lander.style.width = `${width - 4}px`;
+    lander.style.height = `${height * 0.1 - 1}px`;
     lander.style.top = "90%";
-    lander.style.left = "0";
+    lander.style.left = "1px";
   } else if (event.clientX <= left50) {
     lander.style.width = "50px";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = "0";
+    lander.style.height = `${height - 4}px`;
+    lander.style.top = "1px";
+    lander.style.left = "1px";
   } else if (event.clientX >= right50) {
     lander.style.width = "50px";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = right50 - border + "px";
+    lander.style.height = `${height - 4}px`;
+    lander.style.top = "1px";
+    lander.style.left = `${right50 - border - 1}px`;
   } else {
     lander.style.width = "50%";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = "0";
+    lander.style.height = `${height - 4}px`;
+    lander.style.top = "1px";
+    lander.style.left = "1px";
   }
 };
