@@ -47,26 +47,6 @@ export const landerRenderer = (
     lander.style.top = "50%";
     lander.style.left = "0";
   } else if (
-    event.clientX >= halfWidth &&
-    event.clientX <= right50 &&
-    event.clientY >= halfHeight &&
-    event.clientY <= height * perc09
-  ) {
-    lander.style.width = "50%";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = "50%";
-  } else if (
-    event.clientX <= halfWidth &&
-    event.clientX >= left50 &&
-    event.clientY >= halfHeight &&
-    event.clientY <= height * perc09
-  ) {
-    lander.style.width = "50%";
-    lander.style.height = "100%";
-    lander.style.top = "0";
-    lander.style.left = "0";
-  } else if (
     event.clientX >= left50 &&
     event.clientX <= right50 &&
     event.clientY >= height * perc09
