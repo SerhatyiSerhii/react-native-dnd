@@ -40,6 +40,7 @@ export const landerRenderer = (
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = "1px";
     lander.style.left = `${halfWidth - doubleBorder}px`;
+    lander.id = 'right-col';
   } else if (
     topRowChecker(
       event.clientX,
@@ -53,6 +54,7 @@ export const landerRenderer = (
     lander.style.height = "50%";
     lander.style.top = "1px";
     lander.style.left = "1px";
+    lander.id = 'top-row';
   } else if (
     middleRowChecker(
       event.clientX,
@@ -67,6 +69,7 @@ export const landerRenderer = (
     lander.style.height = "50%";
     lander.style.top = `${halfHeight - doubleBorder}px`;
     lander.style.left = "1px";
+    lander.id = 'bottom-row';
   } else if (
     bottomRowChecker(event.clientX, event.clientY, left50, right50, bottomRow)
   ) {
@@ -74,20 +77,24 @@ export const landerRenderer = (
     lander.style.height = `${height * perc01 - border}px`;
     lander.style.top = "90%";
     lander.style.left = "1px";
+    lander.id = 'footer';
   } else if (event.clientX <= left50) {
     lander.style.width = "50px";
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = "1px";
     lander.style.left = "1px";
+    lander.id = 'left-aside';
   } else if (event.clientX >= right50) {
     lander.style.width = "50px";
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = "1px";
     lander.style.left = `${right50 - doubleBorder - border}px`;
+    lander.id = 'right-aside';
   } else {
     lander.style.width = "50%";
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = "1px";
     lander.style.left = "1px";
+    lander.id = 'left-col';
   }
 };

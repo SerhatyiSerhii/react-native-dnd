@@ -1,8 +1,29 @@
-.drop-area {
+.drop-area_row {
     width: 100%;
     height: 500px;
     border: 1px solid black;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
+    display: flex;
+}
+
+.drag-item {
+    height: 100%;
+    width: 100%;
+
+    &.q1 {
+        background-color: bisque;
+    }
+
+    &.q2 {
+        background-color:darkgray
+    }
+}
+
+.lander {
+    position: absolute;
+    outline: dashed 1px lightskyblue;
+    transition: 0.3s;
+    pointer-events: none;
 }
