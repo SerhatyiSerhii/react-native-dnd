@@ -30,7 +30,7 @@ export const DropBoard = () => {
     }
   ]);
 
-  const handleDrop = (event: React.DragEvent) => {
+  const handleDrop = (event: React.DragEvent, item: itemType) => {
     event.preventDefault();
 
     const element_id = event.dataTransfer.getData("widgetType");
@@ -39,11 +39,17 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      setSections([...sections.filter(section => section !== currentEl), currentEl!]);
+      const index = sections.indexOf(item);
+      const filteredSections = sections.filter(section => section !== currentEl);
+      filteredSections.splice(index + 1, 0, currentEl!);
+      setSections(filteredSections);
     }
 
     if (lander?.id === "left-col") {
-      setSections([currentEl!, ...sections.filter(section => section !== currentEl)]);
+      const index = sections.indexOf(item);
+      const filteredSections = sections.filter(section => section !== currentEl);
+      filteredSections.splice(index, 0, currentEl!);
+      setSections(filteredSections);
     }
 
     element.removeAttribute("style");
@@ -54,7 +60,7 @@ export const DropBoard = () => {
   };
 
   const handleDragOver = useCallback(
-    (event: React.DragEvent, item: itemType) => {
+    (event: React.DragEvent) => {
       event.preventDefault();
 
       const lander: HTMLElement | null = document.querySelector(".lander");
@@ -102,9 +108,9 @@ export const DropBoard = () => {
                   className={`drag-item q${section.id}`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, `drag-item q${section.id}`, section)}
-                  onDragOver={(e) => handleDragOver(e, section)}
+                  onDragOver={(e) => handleDragOver(e)}
                   onDrag={dissablePointerEvents}
-                  onDrop={handleDrop}
+                  onDrop={(e) => handleDrop(e, section)}
                 ></div>
               );
             })
