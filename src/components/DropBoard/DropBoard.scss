@@ -17,7 +17,11 @@
     }
 
     &.q2 {
-        background-color:darkgray
+        background-color:darkgray;
+    }
+
+    &.q3 {
+        background-color:cornflowerblue;
     }
 }
 
@@ -26,4 +30,9 @@
     outline: dashed 1px lightskyblue;
     transition: 0.3s;
     pointer-events: none;
+    display: none;
+}
+
+.manager.dragging .lander {
+    display: block;
 }
