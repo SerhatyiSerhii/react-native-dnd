@@ -2,9 +2,16 @@ import React, { useCallback, useState } from "react";
 import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 import "./DropBoard.scss";
 
+type itemType  = {
+  id: number,
+  order: number
+}
+
 export const DropBoard = () => {
   const [draggingEl, setDragginEl] = useState<EventTarget | null>(null);
-  const [sections, setSections] = useState([
+  const [currentEl, setCurrentEl] = useState<itemType | null>(null);
+
+  const [sections, setSections] = useState<itemType[]>([
     {
       id: 1,
       order: 1
@@ -19,7 +26,7 @@ export const DropBoard = () => {
     }
   ]);
 
-  const handleDrop = (event: React.DragEvent, item: any) => {
+  const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
 
     const element_id = event.dataTransfer.getData("widgetType");
@@ -28,12 +35,11 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      setSections([item, ...sections.filter(section => section != item)]);
+      setSections([...sections.filter(section => section != currentEl), currentEl!]);
     }
 
     if (lander?.id === "left-col") {
-      console.log(sections.filter(section => section != item));
-      setSections([...sections.filter(section => section != item), item]);
+      setSections([currentEl!, ...sections.filter(section => section != currentEl)]);
     }
 
     element.removeAttribute("style");
@@ -61,11 +67,12 @@ export const DropBoard = () => {
     [draggingEl, sections]
   );
 
-  const handleDragStart = (event: React.DragEvent, widgetType: string) => {
+  const handleDragStart = (event: React.DragEvent, widgetType: string, item: itemType) => {
     event.dataTransfer.setData("widgetType", widgetType);
     event.dataTransfer.setDragImage(new Image(), 0, 0);
 
     setDragginEl(event.target);
+    setCurrentEl(item);
 
     (event.target as HTMLElement).style.position = "absolute";
 
@@ -89,10 +96,10 @@ export const DropBoard = () => {
                   key={section.id}
                   className={`drag-item q${section.id}`}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, `drag-item q${section.id}`)}
+                  onDragStart={(e) => handleDragStart(e, `drag-item q${section.id}`, section)}
                   onDragOver={handleDragOver}
                   onDrag={dissablePointerEvents}
-                  onDrop={(e) => handleDrop(e, section)}
+                  onDrop={handleDrop}
                 ></div>
               );
             })
