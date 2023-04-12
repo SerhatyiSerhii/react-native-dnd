@@ -1,4 +1,5 @@
 export const rightColumnChecker = (
+    mouseX: number,
     x: number,
     y: number,
     width: number,
@@ -10,7 +11,7 @@ export const rightColumnChecker = (
     return (
       x >= width &&
       x >= leftCol &&
-      x <= rightCol &&
+      mouseX <= rightCol &&
       (y <= height || (y >= height && y < bottomRow))
     );
   };

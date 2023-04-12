@@ -23,6 +23,10 @@ export const DropBoard = () => {
     {
       id: 3,
       order: 3
+    },
+    {
+      id: 4,
+      order: 4
     }
   ]);
 
@@ -35,11 +39,11 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      setSections([...sections.filter(section => section != currentEl), currentEl!]);
+      setSections([...sections.filter(section => section !== currentEl), currentEl!]);
     }
 
     if (lander?.id === "left-col") {
-      setSections([currentEl!, ...sections.filter(section => section != currentEl)]);
+      setSections([currentEl!, ...sections.filter(section => section !== currentEl)]);
     }
 
     element.removeAttribute("style");
@@ -50,7 +54,7 @@ export const DropBoard = () => {
   };
 
   const handleDragOver = useCallback(
-    (event: React.DragEvent) => {
+    (event: React.DragEvent, item: itemType) => {
       event.preventDefault();
 
       const lander: HTMLElement | null = document.querySelector(".lander");
@@ -60,7 +64,8 @@ export const DropBoard = () => {
       (draggingEl as HTMLElement).style.transform = "scale(0.1)";
       (draggingEl as HTMLElement).style.transformOrigin = "0 0";
 
-      const rect = document.querySelector('.manager')?.getBoundingClientRect();
+      // const rect = document.querySelector('.manager')?.getBoundingClientRect();
+      const rect = (event.target as HTMLElement).getBoundingClientRect();
 
       landerRenderer(lander!, event, rect!);
     },
@@ -97,7 +102,7 @@ export const DropBoard = () => {
                   className={`drag-item q${section.id}`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, `drag-item q${section.id}`, section)}
-                  onDragOver={handleDragOver}
+                  onDragOver={(e) => handleDragOver(e, section)}
                   onDrag={dissablePointerEvents}
                   onDrop={handleDrop}
                 ></div>

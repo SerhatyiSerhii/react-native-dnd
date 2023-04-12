@@ -27,23 +27,24 @@ export const landerRenderer = (
 
   if (
     rightColumnChecker(
-      event.clientX,
+      event.clientX ,
+      event.clientX - rect.x,
       event.clientY,
       rightColumn,
       halfHeight,
       left50,
-      right50,
+      window.screen.width - 50,
       bottomRow
     )
   ) {
     lander.style.width = `${halfWidth - doubleBorder}px`;
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = `${doubleBorder}px`;
-    lander.style.left = `${halfWidth}px`;
+    lander.style.left = `${rect.x + halfWidth}px`;
     lander.id = 'right-col';
   } else if (
     topRowChecker(
-      event.clientX,
+      event.clientX - rect.x,
       event.clientY,
       halfWidth * perc06,
       halfHeight,
@@ -53,11 +54,11 @@ export const landerRenderer = (
     lander.style.width = `${width - twoDoubleBorders}px`;
     lander.style.height = `${halfHeight - doubleBorder}px`;
     lander.style.top = `${doubleBorder}px`;
-    lander.style.left = `${doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
     lander.id = 'top-row';
   } else if (
     middleRowChecker(
-      event.clientX,
+      event.clientX - rect.x,
       event.clientY,
       halfWidth * perc06,
       halfHeight,
@@ -68,12 +69,12 @@ export const landerRenderer = (
     lander.style.width = `${width - twoDoubleBorders}px`;
     lander.style.height = `${halfHeight - doubleBorder}px`;
     lander.style.top = `${halfHeight}px`;
-    lander.style.left = `${doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
     lander.id = 'bottom-row';
   } else if (
-    bottomRowChecker(event.clientX, event.clientY, left50, right50, bottomRow)
+    bottomRowChecker(event.clientX, event.clientX - rect.x, event.clientY, left50, window.screen.width - 50, bottomRow)
   ) {
-    lander.style.width = `${width - twoDoubleBorders}px`;
+    lander.style.width = `${window.screen.width - twoDoubleBorders}px`;
     lander.style.height = `${height * perc01 - doubleBorder}px`;
     lander.style.top = `${height * perc09}px`;
     lander.style.left = `${doubleBorder}px`;
@@ -82,19 +83,19 @@ export const landerRenderer = (
     lander.style.width = `${left50 - doubleBorder}px`;
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = `${doubleBorder}px`;
-    lander.style.left = `${doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
     lander.id = 'left-aside';
-  } else if (event.clientX >= right50) {
+  } else if (event.clientX >= window.screen.width - 50) {
     lander.style.width = `${left50 - doubleBorder}px`;
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = `${doubleBorder}px`;
-    lander.style.left = `${right50}px`;
+    lander.style.left = `${rect.x + right50}px`;
     lander.id = 'right-aside';
   } else {
     lander.style.width = `${halfWidth - doubleBorder}px`;
     lander.style.height = `${height - twoDoubleBorders}px`;
     lander.style.top = `${doubleBorder}px`;
-    lander.style.left = `${doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
     lander.id = 'left-col';
   }
 };
