@@ -39,15 +39,15 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      const index = sections.indexOf(item);
       const filteredSections = sections.filter(section => section !== currentEl);
+      const index = filteredSections.indexOf(item);
       filteredSections.splice(index + 1, 0, currentEl!);
       setSections(filteredSections);
     }
 
     if (lander?.id === "left-col") {
-      const index = sections.indexOf(item);
       const filteredSections = sections.filter(section => section !== currentEl);
+      const index = filteredSections.indexOf(item);
       filteredSections.splice(index, 0, currentEl!);
       setSections(filteredSections);
     }
