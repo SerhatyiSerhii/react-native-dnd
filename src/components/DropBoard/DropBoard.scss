@@ -27,6 +27,11 @@
     &.q4 {
         background-color: darkcyan;
     }
+
+    &.col {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .lander {

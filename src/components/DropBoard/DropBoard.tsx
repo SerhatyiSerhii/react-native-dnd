@@ -4,7 +4,8 @@ import "./DropBoard.scss";
 
 type itemType  = {
   id: number,
-  order: number
+  order?: number,
+  rows?: itemType[]
 }
 
 export const DropBoard = () => {
@@ -39,17 +40,60 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      const filteredSections = sections.filter(section => section !== currentEl);
+      const filteredSections = sections.map(section => {
+        if (section.hasOwnProperty('rows')) {
+          section.rows = section.rows?.filter(row => row !== currentEl);
+          return section.rows!.length > 1 ? section : section.rows![0];
+        }
+        return section;
+      }).filter(section => section !== currentEl);
+
       const index = filteredSections.indexOf(item);
       filteredSections.splice(index + 1, 0, currentEl!);
       setSections(filteredSections);
     }
 
     if (lander?.id === "left-col") {
-      const filteredSections = sections.filter(section => section !== currentEl);
+      const filteredSections = sections.map(section => {
+        if (section.hasOwnProperty('rows')) {
+          section.rows = section.rows?.filter(row => row !== currentEl);
+          return section.rows!.length > 1 ? section : section.rows![0];
+        }
+        return section;
+      }).filter(section => section !== currentEl);
+
       const index = filteredSections.indexOf(item);
       filteredSections.splice(index, 0, currentEl!);
       setSections(filteredSections);
+    }
+
+    if (lander?.id === "bottom-row") {
+      const filteredSections = sections.filter(section => section !== currentEl);
+
+      const index = filteredSections.indexOf(item);
+
+      if (index < 0) {
+        const targetColumn = filteredSections.filter((section) => section.hasOwnProperty('rows')).find((columns) => columns.rows?.includes(item));
+
+        targetColumn!.rows = targetColumn!.rows!.filter(row => row !== currentEl);
+
+        const targetIndex = targetColumn!.rows!.indexOf(item);
+
+        targetColumn?.rows?.splice(targetIndex + 1, 0, currentEl!);
+
+        setSections(filteredSections);
+      } else {
+        const deepFilter = sections.filter(section => section !== currentEl && section !== item);
+
+        const column = {
+          id: sections.length + 1,
+          rows: [item, currentEl!]
+        }
+
+        deepFilter.splice(index, 0, column);
+
+        setSections(deepFilter);
+      }
     }
 
     element.removeAttribute("style");
@@ -70,12 +114,11 @@ export const DropBoard = () => {
       (draggingEl as HTMLElement).style.transform = "scale(0.1)";
       (draggingEl as HTMLElement).style.transformOrigin = "0 0";
 
-      // const rect = document.querySelector('.manager')?.getBoundingClientRect();
       const rect = (event.target as HTMLElement).getBoundingClientRect();
 
       landerRenderer(lander!, event, rect!);
     },
-    [draggingEl, sections]
+    [draggingEl]
   );
 
   const handleDragStart = (event: React.DragEvent, widgetType: string, item: itemType) => {
@@ -94,27 +137,39 @@ export const DropBoard = () => {
     (event.target as HTMLElement).style.pointerEvents = "none";
   };
 
+  const drowElements = (arr: itemType[]) => {
+    return arr.map((item) => {
+      if ('rows' in item) {
+        return (
+          <div key={item.id} className={`drag-item col`}>
+            {
+              drowElements(item.rows!)
+            }
+          </div>
+        );
+      }
+
+      return (
+        <div
+          key={item.id}
+          className={`drag-item q${item.id}`}
+          draggable
+          onDragStart={(e) => handleDragStart(e, `drag-item q${item.id}`, item)}
+          onDragOver={(e) => handleDragOver(e)}
+          onDrag={dissablePointerEvents}
+          onDrop={(e) => handleDrop(e, item)}
+        ></div>
+      );
+    });
+  }
+
   return (
     <div className="container">
       <div className="manager">
         <div
           className="drop-area_row"
         >
-          {
-            sections.map((section) => {
-              return (
-                <div
-                  key={section.id}
-                  className={`drag-item q${section.id}`}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, `drag-item q${section.id}`, section)}
-                  onDragOver={(e) => handleDragOver(e)}
-                  onDrag={dissablePointerEvents}
-                  onDrop={(e) => handleDrop(e, section)}
-                ></div>
-              );
-            })
-          }
+          {drowElements(sections)}
         </div>
         <div className="lander" />
       </div>
