@@ -68,11 +68,17 @@ export const DropBoard = () => {
     }
 
     if (lander?.id === "bottom-row") {
-      const filteredSections = sections.filter(section => section !== currentEl);
+      let filteredSections = sections.filter(section => section !== currentEl);
 
       const index = filteredSections.indexOf(item);
 
       if (index < 0) {
+        const originColumn = filteredSections.filter((section) => section.hasOwnProperty('rows')).find((columns) => columns.rows?.includes(currentEl!));
+
+        if (originColumn) {
+          originColumn!.rows = originColumn?.rows?.filter(row => row !== currentEl);
+        }
+
         const targetColumn = filteredSections.filter((section) => section.hasOwnProperty('rows')).find((columns) => columns.rows?.includes(item));
 
         targetColumn!.rows = targetColumn!.rows!.filter(row => row !== currentEl);
@@ -81,9 +87,32 @@ export const DropBoard = () => {
 
         targetColumn?.rows?.splice(targetIndex + 1, 0, currentEl!);
 
+        filteredSections = filteredSections.map((section) => {
+          if (section.rows?.length === 1) {
+            return section.rows[0];
+          }
+
+          return section;
+        });
+
         setSections(filteredSections);
       } else {
-        const deepFilter = sections.filter(section => section !== currentEl && section !== item);
+        let deepFilter = sections.filter(section => section !== currentEl && section !== item);
+
+        const newColumn = deepFilter.find(section => section.hasOwnProperty('rows'));
+
+        if (newColumn) {
+          newColumn.rows = newColumn.rows?.filter(row => row !== currentEl);
+
+          deepFilter = deepFilter.map((section) => {
+            if (section.hasOwnProperty('rows')) {
+              section.rows = section.rows?.filter(row => row !== currentEl);
+              return section.rows!.length > 1 ? section : section.rows![0];
+            }
+
+            return section;
+          });
+        }
 
         const column = {
           id: sections.length + 1,
