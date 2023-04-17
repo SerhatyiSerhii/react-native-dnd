@@ -291,31 +291,6 @@ export const DropBoard = () => {
 
       const parentElement = findParent(configCopy) as configType;
 
-      // if (parentElement) {
-      //   const targetElIndex = parentElement.content.findIndex(
-      //     (el) => el.id === targetElem.id
-      //   );
-
-      //   if (parentElement.type === 'row' && !targetElem.parentId.includes("column") && targetElIndex >= 0) {
-      //     const column: configType = {
-      //       type: "column",
-      //       id: `column-${columnId + 1}`,
-      //       parentId: targetElem.parentId,
-      //       content: [targetElem, currentEl!],
-      //     };
-
-      //     setColumnId(columnId + 1);
-
-      //     targetElem.parentId = column.id;
-      //     currentEl!.parentId = column.id;
-
-      //     parentElement.content[targetElIndex] = column;
-      //   } else {
-      //     currentEl!.parentId = targetElem.parentId;
-      //     parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
-      //   }
-      // }
-
       if (parentElement) {
         const findTargetElIndex = function (
           arr: (configType | componentType)[]
