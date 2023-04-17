@@ -20,7 +20,8 @@ type componentType = {
 export const DropBoard = () => {
   const [draggingEl, setDragginEl] = useState<EventTarget | null>(null);
   const [currentEl, setCurrentEl] = useState<componentType | null>(null);
-
+  const [columnId, setColumnId] = useState<number>(0);
+  const [rowId, setRowId] = useState<number>(1);
   const [config, setConfig] = useState<configType[]>([
     {
       type: "row",
@@ -77,7 +78,11 @@ export const DropBoard = () => {
           }
 
           if ((i as configType)?.content) {
-            return findParent((i as configType).content);
+            const target = findParent((i as configType).content);
+
+            if (target) {
+              return target;
+            }
           }
         }
       };
@@ -97,25 +102,53 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy) as configType;
 
       if (parentElement) {
-        const targetElIndex = parentElement.content.findIndex(
-          (el) => el.id === targetElem.id
-        );
+        const findTargetElIndex = function (
+          arr: (configType | componentType)[]
+        ): number {
+
+          for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id === targetElem.id) {
+              return i;
+            }
+
+            if ((arr[i] as configType)?.content) {
+              const target = findTargetElIndex((arr[i] as configType).content);
+
+              if (target >= 0) {
+                return target;
+              }
+            }
+          }
+
+          return -1;
+        };
+
+        const targetElIndex = findTargetElIndex(parentElement.content);
+
 
         if (parentElement.type === 'column' && !targetElem.parentId.includes("row") && targetElIndex >= 0) {
           const row: configType = {
             type: "row",
-            id: "row-1",
+            id: `row-${rowId + 1}`,
             parentId: targetElem.parentId,
             content: [targetElem, currentEl!],
           };
+
+          setRowId(rowId + 1);
 
           targetElem.parentId = row.id;
           currentEl!.parentId = row.id;
 
           parentElement.content[targetElIndex] = row;
         } else {
-          currentEl!.parentId = targetElem.parentId;
-          parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+          const column = findParent(parentElement.content) as configType;
+
+          if (column) {
+            column.content.splice(targetElIndex + 1, 0, currentEl!);
+          } else {
+            currentEl!.parentId = targetElem.parentId;
+            parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+          }
         }
       }
 
@@ -139,7 +172,11 @@ export const DropBoard = () => {
           }
 
           if ((i as configType)?.content) {
-            return findParent((i as configType).content);
+            const target = findParent((i as configType).content);
+
+            if (target) {
+              return target;
+            }
           }
         }
       };
@@ -159,25 +196,53 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy) as configType;
 
       if (parentElement) {
-        const targetElIndex = parentElement.content.findIndex(
-          (el) => el.id === targetElem.id
-        );
+        const findTargetElIndex = function (
+          arr: (configType | componentType)[]
+        ): number {
+
+          for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id === targetElem.id) {
+              return i;
+            }
+
+            if ((arr[i] as configType)?.content) {
+              const target = findTargetElIndex((arr[i] as configType).content);
+
+              if (target >= 0) {
+                return target;
+              }
+            }
+          }
+
+          return -1;
+        };
+
+        const targetElIndex = findTargetElIndex(parentElement.content);
+
 
         if (parentElement.type === 'column' && !targetElem.parentId.includes("row") && targetElIndex >= 0) {
           const row: configType = {
             type: "row",
-            id: "row-1",
+            id: `row-${rowId + 1}`,
             parentId: targetElem.parentId,
             content: [currentEl!, targetElem],
           };
+
+          setRowId(rowId + 1);
 
           targetElem.parentId = row.id;
           currentEl!.parentId = row.id;
 
           parentElement.content[targetElIndex] = row;
         } else {
-          currentEl!.parentId = targetElem.parentId;
-          parentElement.content.splice(targetElIndex, 0, currentEl!);
+          const column = findParent(parentElement.content) as configType;
+
+          if (column) {
+            column.content.splice(targetElIndex, 0, currentEl!);
+          } else {
+            currentEl!.parentId = targetElem.parentId;
+            parentElement.content.splice(targetElIndex, 0, currentEl!);
+          }
         }
       }
 
@@ -201,7 +266,11 @@ export const DropBoard = () => {
           }
 
           if ((i as configType)?.content) {
-            return findParent((i as configType).content);
+            const target = findParent((i as configType).content);
+
+            if (target) {
+              return target;
+            }
           }
         }
       };
@@ -222,26 +291,79 @@ export const DropBoard = () => {
 
       const parentElement = findParent(configCopy) as configType;
 
+      // if (parentElement) {
+      //   const targetElIndex = parentElement.content.findIndex(
+      //     (el) => el.id === targetElem.id
+      //   );
+
+      //   if (parentElement.type === 'row' && !targetElem.parentId.includes("column") && targetElIndex >= 0) {
+      //     const column: configType = {
+      //       type: "column",
+      //       id: `column-${columnId + 1}`,
+      //       parentId: targetElem.parentId,
+      //       content: [targetElem, currentEl!],
+      //     };
+
+      //     setColumnId(columnId + 1);
+
+      //     targetElem.parentId = column.id;
+      //     currentEl!.parentId = column.id;
+
+      //     parentElement.content[targetElIndex] = column;
+      //   } else {
+      //     currentEl!.parentId = targetElem.parentId;
+      //     parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+      //   }
+      // }
+
       if (parentElement) {
-        const targetElIndex = parentElement.content.findIndex(
-          (el) => el.id === targetElem.id
-        );
+        const findTargetElIndex = function (
+          arr: (configType | componentType)[]
+        ): number {
+
+          for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id === targetElem.id) {
+              return i;
+            }
+
+            if ((arr[i] as configType)?.content) {
+              const target = findTargetElIndex((arr[i] as configType).content);
+
+              if (target >= 0) {
+                return target;
+              }
+            }
+          }
+
+          return -1;
+        };
+
+        const targetElIndex = findTargetElIndex(parentElement.content);
+
 
         if (parentElement.type === 'row' && !targetElem.parentId.includes("column") && targetElIndex >= 0) {
           const column: configType = {
             type: "column",
-            id: "column-1",
+            id: `column-${columnId + 1}`,
             parentId: targetElem.parentId,
             content: [targetElem, currentEl!],
           };
+
+          setColumnId(columnId + 1);
 
           targetElem.parentId = column.id;
           currentEl!.parentId = column.id;
 
           parentElement.content[targetElIndex] = column;
         } else {
-          currentEl!.parentId = targetElem.parentId;
-          parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+          const row = findParent(parentElement.content) as configType;
+
+          if (row) {
+            row.content.splice(targetElIndex, 0, currentEl!);
+          } else {
+            currentEl!.parentId = targetElem.parentId;
+            parentElement.content.splice(targetElIndex, 0, currentEl!);
+          }
         }
       }
 
