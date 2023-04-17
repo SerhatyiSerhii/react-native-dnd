@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 import "./DropBoard.scss";
 
@@ -359,7 +359,7 @@ export const DropBoard = () => {
     setDragginEl(null);
   };
 
-  const handleDragOver = useCallback(
+  const handleDragOver =
     (event: React.DragEvent) => {
       event.preventDefault();
 
@@ -373,9 +373,7 @@ export const DropBoard = () => {
       const rect = (event.target as HTMLElement).getBoundingClientRect();
 
       landerRenderer(lander!, event, rect!);
-    },
-    [draggingEl]
-  );
+    };
 
   const handleDragStart = (
     event: React.DragEvent,
