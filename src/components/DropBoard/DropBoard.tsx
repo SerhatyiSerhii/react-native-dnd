@@ -2,36 +2,64 @@ import React, { useCallback, useState } from "react";
 import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 import "./DropBoard.scss";
 
-type itemType  = {
-  id: number,
-  order?: number,
-  rows?: itemType[]
-}
+type configType = {
+  type: string;
+  id: string;
+  parentId: string;
+  content: (configType | componentType)[];
+};
+
+type componentType = {
+  type: string;
+  componentName: string;
+  componentState: { label: string };
+  id: string;
+  parentId: string;
+};
 
 export const DropBoard = () => {
   const [draggingEl, setDragginEl] = useState<EventTarget | null>(null);
-  const [currentEl, setCurrentEl] = useState<itemType | null>(null);
+  const [currentEl, setCurrentEl] = useState<componentType | null>(null);
 
-  const [sections, setSections] = useState<itemType[]>([
+  const [config, setConfig] = useState<configType[]>([
     {
-      id: 1,
-      order: 1
+      type: "row",
+      id: "row-1",
+      parentId: "top-parent",
+      content: [
+        {
+          type: "component",
+          componentName: "test_name",
+          componentState: { label: "A" },
+          id: "1",
+          parentId: "row-1",
+        },
+        {
+          type: "component",
+          componentName: "test_name",
+          componentState: { label: "B" },
+          id: "2",
+          parentId: "row-1",
+        },
+        {
+          type: "component",
+          componentName: "test_name",
+          componentState: { label: "C" },
+          id: "3",
+          parentId: "row-1",
+        },
+        {
+          type: "component",
+          componentName: "test_name",
+          componentState: { label: "D" },
+          id: "4",
+          parentId: "row-1",
+        },
+      ],
     },
-    {
-      id: 2,
-      order: 2
-    },
-    {
-      id: 3,
-      order: 3
-    },
-    {
-      id: 4,
-      order: 4
-    }
   ]);
 
-  const handleDrop = (event: React.DragEvent, item: itemType) => {
+  const handleDrop = (event: React.DragEvent, targetElem: componentType) => {
     event.preventDefault();
 
     const element_id = event.dataTransfer.getData("widgetType");
@@ -40,94 +68,123 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      const filteredSections = sections.map(section => {
-        if (section.hasOwnProperty('rows')) {
-          section.rows = section.rows?.filter(row => row !== currentEl);
-          return section.rows!.length > 1 ? section : section.rows![0];
-        }
-        return section;
-      }).filter(section => section !== currentEl);
+      const selector = function (arr: any[]) {
+        return arr
+          .filter((item) => {
+            if (item.content) {
+              item.content = selector(item.content);
+            }
 
-      const index = filteredSections.indexOf(item);
-      filteredSections.splice(index + 1, 0, currentEl!);
-      setSections(filteredSections);
+            return item.id !== currentEl!.id;
+          })
+          .map((item: any) => {
+            if (item.content) {
+              const targetIndex = item.content.findIndex(
+                (i: any) => i.id === targetElem.id
+              );
+
+              item.content.splice(targetIndex + 1, 0, currentEl);
+            }
+
+            return item;
+          });
+      };
+
+      const newConf: configType[] = selector(
+        JSON.parse(JSON.stringify(config))
+      );
+
+      setConfig(newConf);
     }
 
     if (lander?.id === "left-col") {
-      const filteredSections = sections.map(section => {
-        if (section.hasOwnProperty('rows')) {
-          section.rows = section.rows?.filter(row => row !== currentEl);
-          return section.rows!.length > 1 ? section : section.rows![0];
-        }
-        return section;
-      }).filter(section => section !== currentEl);
+      const selector = function (arr: any[]) {
+        return arr
+          .filter((item: any) => {
+            if (item.content) {
+              item.content = selector(item.content);
+            }
 
-      const index = filteredSections.indexOf(item);
-      filteredSections.splice(index, 0, currentEl!);
-      setSections(filteredSections);
+            return item.id !== currentEl!.id;
+          })
+          .map((item: any) => {
+            if (item.content) {
+              const targetIndex = item.content.findIndex(
+                (i: any) => i.id === targetElem.id
+              );
+
+              item.content.splice(targetIndex, 0, currentEl);
+            }
+
+            return item;
+          });
+      };
+
+      const newConf = selector(JSON.parse(JSON.stringify(config)));
+
+      setConfig(newConf);
     }
 
     if (lander?.id === "bottom-row") {
-      let filteredSections = sections.filter(section => section !== currentEl);
-
-      const index = filteredSections.indexOf(item);
-
-      if (index < 0) {
-        const originColumn = filteredSections.filter((section) => section.hasOwnProperty('rows')).find((columns) => columns.rows?.includes(currentEl!));
-
-        if (originColumn) {
-          originColumn!.rows = originColumn?.rows?.filter(row => row !== currentEl);
-        }
-
-        const targetColumn = filteredSections.filter((section) => section.hasOwnProperty('rows')).find((columns) => columns.rows?.includes(item));
-
-        targetColumn!.rows = targetColumn!.rows!.filter(row => row !== currentEl);
-
-        const targetIndex = targetColumn!.rows!.indexOf(item);
-
-        targetColumn?.rows?.splice(targetIndex + 1, 0, currentEl!);
-
-        filteredSections = filteredSections.map((section) => {
-          if (section.rows?.length === 1) {
-            return section.rows[0];
+      const findParent = function (
+        arr: (configType | componentType)[]
+      ): configType | componentType | undefined {
+        for (let i of arr) {
+          if (i.id === targetElem.parentId) {
+            return i;
           }
 
-          return section;
+          if ((i as configType)?.content) {
+            return findParent((i as configType).content);
+          }
+        }
+      };
+
+      const filter = function (arr: (configType | componentType)[]) {
+        return arr.filter((item) => {
+          if ((item as configType).content) {
+            (item as configType).content = filter((item as configType).content);
+          }
+
+          return item.id !== currentEl?.id;
         });
+      };
 
-        setSections(filteredSections);
-      } else {
-        let deepFilter = sections.filter(section => section !== currentEl && section !== item);
+      const configCopy = filter(
+        JSON.parse(JSON.stringify(config))
+      ) as configType[];
 
-        const newColumn = deepFilter.find(section => section.hasOwnProperty('rows'));
+      const parentElement = findParent(configCopy) as configType;
 
-        if (newColumn) {
-          newColumn.rows = newColumn.rows?.filter(row => row !== currentEl);
+      if (parentElement) {
+        const targetElIndex = parentElement.content.findIndex(
+          (el) => el.id === targetElem.id
+        );
 
-          deepFilter = deepFilter.map((section) => {
-            if (section.hasOwnProperty('rows')) {
-              section.rows = section.rows?.filter(row => row !== currentEl);
-              return section.rows!.length > 1 ? section : section.rows![0];
-            }
+        if (!targetElem.parentId.includes("column") && targetElIndex >= 0) {
+          const column: configType = {
+            type: "column",
+            id: "column-1",
+            parentId: targetElem.parentId,
+            content: [targetElem, currentEl!],
+          };
 
-            return section;
-          });
+          targetElem.parentId = column.id;
+          currentEl!.parentId = column.id;
+
+          parentElement.content[targetElIndex] = column;
+        } else {
+          currentEl!.parentId = targetElem.parentId;
+          parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
         }
-
-        const column = {
-          id: sections.length + 1,
-          rows: [item, currentEl!]
-        }
-
-        deepFilter.splice(index, 0, column);
-
-        setSections(deepFilter);
       }
+
+      setConfig(configCopy);
     }
 
     element.removeAttribute("style");
 
-    document.querySelector('.manager')?.classList.remove('dragging');
+    document.querySelector(".manager")?.classList.remove("dragging");
 
     setDragginEl(null);
   };
@@ -150,30 +207,40 @@ export const DropBoard = () => {
     [draggingEl]
   );
 
-  const handleDragStart = (event: React.DragEvent, widgetType: string, item: itemType) => {
+  const handleDragStart = (
+    event: React.DragEvent,
+    widgetType: string,
+    item: componentType
+  ) => {
     event.dataTransfer.setData("widgetType", widgetType);
     event.dataTransfer.setDragImage(new Image(), 0, 0);
 
     setDragginEl(event.target);
-    setCurrentEl(item);
+    setCurrentEl(JSON.parse(JSON.stringify(item)));
 
     (event.target as HTMLElement).style.position = "absolute";
 
-    document.querySelector('.manager')?.classList.add('dragging');
+    document.querySelector(".manager")?.classList.add("dragging");
   };
 
   const dissablePointerEvents = (event: React.DragEvent) => {
     (event.target as HTMLElement).style.pointerEvents = "none";
   };
 
-  const drowElements = (arr: itemType[]) => {
+  const drowElements = (arr: (componentType | configType)[]) => {
     return arr.map((item) => {
-      if ('rows' in item) {
+      if (item.type === "stack" || item.type === "row") {
         return (
-          <div key={item.id} className={`drag-item col`}>
-            {
-              drowElements(item.rows!)
-            }
+          <div key={item.id} className={item.type}>
+            {drowElements((item as configType).content)}
+          </div>
+        );
+      }
+
+      if (item.type === "column") {
+        return (
+          <div key={item.id} className={item.type}>
+            {drowElements((item as configType).content)}
           </div>
         );
       }
@@ -183,23 +250,21 @@ export const DropBoard = () => {
           key={item.id}
           className={`drag-item q${item.id}`}
           draggable
-          onDragStart={(e) => handleDragStart(e, `drag-item q${item.id}`, item)}
+          onDragStart={(e) =>
+            handleDragStart(e, `drag-item q${item.id}`, item as componentType)
+          }
           onDragOver={(e) => handleDragOver(e)}
           onDrag={dissablePointerEvents}
-          onDrop={(e) => handleDrop(e, item)}
+          onDrop={(e) => handleDrop(e, item as componentType)}
         ></div>
       );
     });
-  }
+  };
 
   return (
     <div className="container">
       <div className="manager">
-        <div
-          className="drop-area_row"
-        >
-          {drowElements(sections)}
-        </div>
+        {drowElements(config)}
         <div className="lander" />
       </div>
     </div>
