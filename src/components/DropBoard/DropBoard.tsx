@@ -179,7 +179,14 @@ export const DropBoard = () => {
         }
       }
 
-      setConfig(configCopy);
+      setConfig(configCopy.map(item => {
+        if (item.content.length === 1 && (item.type === 'row' || item.type === 'column')) {
+          item.content[0].parentId = 'top-parent';
+          return item.content[0];
+        }
+
+        return item;
+      }) as configType[]);
     }
 
     element.removeAttribute("style");
