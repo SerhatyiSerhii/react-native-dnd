@@ -68,33 +68,65 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      const selector = function (arr: any[]) {
-        return arr
-          .filter((item) => {
-            if (item.content) {
-              item.content = selector(item.content);
-            }
+      const findParent = function (
+        arr: (configType | componentType)[]
+      ): configType | componentType | undefined {
+        for (let i of arr) {
+          if (i.id === targetElem.parentId) {
+            return i;
+          }
 
-            return item.id !== currentEl!.id;
-          })
-          .map((item: any) => {
-            if (item.content) {
-              const targetIndex = item.content.findIndex(
-                (i: any) => i.id === targetElem.id
-              );
-
-              item.content.splice(targetIndex + 1, 0, currentEl);
-            }
-
-            return item;
-          });
+          if ((i as configType)?.content) {
+            return findParent((i as configType).content);
+          }
+        }
       };
 
-      const newConf: configType[] = selector(
-        JSON.parse(JSON.stringify(config))
-      );
+      const filter = function (arr: (configType | componentType)[]) {
+        return arr.filter((item) => {
+          if ((item as configType).content) {
+            (item as configType).content = filter((item as configType).content);
+          }
 
-      setConfig(newConf);
+          return item.id !== currentEl?.id;
+        });
+      };
+
+      const configCopy = filter(JSON.parse(JSON.stringify(config))) as configType[];
+
+      const parentElement = findParent(configCopy) as configType;
+
+      if (parentElement) {
+        const targetElIndex = parentElement.content.findIndex(
+          (el) => el.id === targetElem.id
+        );
+
+        if (parentElement.type === 'column' && !targetElem.parentId.includes("row") && targetElIndex >= 0) {
+          const row: configType = {
+            type: "row",
+            id: "row-1",
+            parentId: targetElem.parentId,
+            content: [targetElem, currentEl!],
+          };
+
+          targetElem.parentId = row.id;
+          currentEl!.parentId = row.id;
+
+          parentElement.content[targetElIndex] = row;
+        } else {
+          currentEl!.parentId = targetElem.parentId;
+          parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+        }
+      }
+
+      setConfig(configCopy.map(item => {
+        if (item.content.length === 1 && (item.type === 'row' || item.type === 'column')) {
+          item.content[0].parentId = 'top-parent';
+          return item.content[0];
+        }
+
+        return item;
+      }) as configType[]);
     }
 
     if (lander?.id === "left-col") {
