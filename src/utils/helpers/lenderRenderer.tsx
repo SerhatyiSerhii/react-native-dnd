@@ -20,74 +20,126 @@ export const landerRenderer = (
   const left50 = 50;
   const right50 = width - 50;
   const border = 1;
-  const doubleBorder = 2;
+  const doubleBorder = border * 2;
   const twoDoubleBorders = doubleBorder * 2;
   const rightColumn = width * perc07;
   const bottomRow = height * perc09;
 
+  // if (
+  //   rightColumnChecker(
+  //     event.clientX ,
+  //     event.clientX - rect.x,
+  //     event.clientY - rect.y,
+  //     rightColumn,
+  //     halfHeight,
+  //     left50,
+  //     window.screen.width - 50,
+  //     bottomRow
+  //   )
+  // ) {
+  //   lander.style.width = `${halfWidth - doubleBorder}px`;
+  //   lander.style.height = `${height - twoDoubleBorders}px`;
+  //   lander.style.top = `${rect.y + doubleBorder}px`;
+  //   lander.style.left = `${rect.x + halfWidth}px`;
+  //   lander.id = 'right-col';
+  // } else if (
+  //   topRowChecker(
+  //     event.clientX - rect.x,
+  //     event.clientY,
+  //     halfWidth * perc06,
+  //     halfHeight,
+  //     right50
+  //   )
+  // ) {
+  //   lander.style.width = `${width - twoDoubleBorders}px`;
+  //   lander.style.height = `${halfHeight - doubleBorder}px`;
+  //   lander.style.top = `${rect.y + doubleBorder}px`;
+  //   lander.style.left = `${rect.x + doubleBorder}px`;
+  //   lander.id = 'top-row';
+  // } else if (
+  //   middleRowChecker(
+  //     event.clientX - rect.x,
+  //     event.clientY,
+  //     halfWidth * perc06,
+  //     halfHeight,
+  //     right50,
+  //     bottomRow
+  //   )
+  // ) {
+  //   lander.style.width = `${width - twoDoubleBorders}px`;
+  //   lander.style.height = `${halfHeight - doubleBorder}px`;
+  //   lander.style.top = `${rect.y + halfHeight}px`;
+  //   lander.style.left = `${rect.x + doubleBorder}px`;
+  //   lander.id = 'bottom-row';
+  // } else if (
+  //   bottomRowChecker(event.clientX, event.clientX - rect.x, event.clientY, left50, window.screen.width - 50, bottomRow)
+  // ) {
+  //   lander.style.width = `${window.screen.width - twoDoubleBorders}px`;
+  //   lander.style.height = `${height * perc01 - doubleBorder}px`;
+  //   lander.style.top = `${rect.y + height * perc09}px`;
+  //   lander.style.left = `${doubleBorder}px`;
+  //   lander.id = 'footer';
+  // } else if (event.clientX <= left50) {
+  //   lander.style.width = `${left50 - doubleBorder}px`;
+  //   lander.style.height = `${height - twoDoubleBorders}px`;
+  //   lander.style.top = `${rect.y + doubleBorder}px`;
+  //   lander.style.left = `${rect.x + doubleBorder}px`;
+  //   lander.id = 'left-aside';
+  // } else if (event.clientX >= window.screen.width - 50) {
+  //   lander.style.width = `${left50 - doubleBorder}px`;
+  //   lander.style.height = `${height - twoDoubleBorders}px`;
+  //   lander.style.top = `${rect.y + doubleBorder}px`;
+  //   lander.style.left = `${rect.x + right50}px`;
+  //   lander.id = 'right-aside';
+  // } else {
+  //   lander.style.width = `${halfWidth - doubleBorder}px`;
+  //   lander.style.height = `${height - twoDoubleBorders}px`;
+  //   lander.style.top = `${rect.y + doubleBorder}px`;
+  //   lander.style.left = `${rect.x + doubleBorder}px`;
+  //   lander.id = 'left-col';
+  // }
+
+  // Left col
+  if (event.clientX - rect.x >= 50 && event.clientX - rect.x < rightColumn) {
+    lander.style.width = `${halfWidth - doubleBorder}px`;
+    lander.style.height = `${height - twoDoubleBorders}px`;
+    lander.style.top = `${rect.y + doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
+    lander.id = "left-col";
+  }
+
+  // Right col
+  if (event.clientX - rect.x >= rightColumn) {
+    lander.style.width = `${halfWidth - doubleBorder}px`;
+    lander.style.height = `${height - twoDoubleBorders}px`;
+    lander.style.top = `${rect.y + doubleBorder}px`;
+    lander.style.left = `${rect.x + halfWidth}px`;
+    lander.id = 'right-col';
+  }
+
+  // Top row
   if (
-    rightColumnChecker(
-      event.clientX,
-      event.clientY,
-      rightColumn,
-      halfHeight,
-      left50,
-      right50,
-      bottomRow
-    )
-  ) {
-    lander.style.width = "50%";
-    lander.style.height = `${height - twoDoubleBorders}px`;
-    lander.style.top = "1px";
-    lander.style.left = `${halfWidth - doubleBorder}px`;
-  } else if (
-    topRowChecker(
-      event.clientX,
-      event.clientY,
-      halfWidth * perc06,
-      halfHeight,
-      right50
-    )
+    event.clientY - rect.y < halfHeight &&
+    event.clientX - rect.x > width * 0.3 &&
+    event.clientX - rect.x < rightColumn
   ) {
     lander.style.width = `${width - twoDoubleBorders}px`;
-    lander.style.height = "50%";
-    lander.style.top = "1px";
-    lander.style.left = "1px";
-  } else if (
-    middleRowChecker(
-      event.clientX,
-      event.clientY,
-      halfWidth * perc06,
-      halfHeight,
-      right50,
-      bottomRow
-    )
+    lander.style.height = `${halfHeight - doubleBorder}px`;
+    lander.style.top = `${rect.y + doubleBorder}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
+    lander.id = "top-row";
+  }
+
+  // Bottom row
+  if (
+    event.clientY - rect.y > halfHeight &&
+    event.clientX - rect.x > width * 0.3 &&
+    event.clientX - rect.x < rightColumn
   ) {
     lander.style.width = `${width - twoDoubleBorders}px`;
-    lander.style.height = "50%";
-    lander.style.top = `${halfHeight - doubleBorder}px`;
-    lander.style.left = "1px";
-  } else if (
-    bottomRowChecker(event.clientX, event.clientY, left50, right50, bottomRow)
-  ) {
-    lander.style.width = `${width - twoDoubleBorders}px`;
-    lander.style.height = `${height * perc01 - border}px`;
-    lander.style.top = "90%";
-    lander.style.left = "1px";
-  } else if (event.clientX <= left50) {
-    lander.style.width = "50px";
-    lander.style.height = `${height - twoDoubleBorders}px`;
-    lander.style.top = "1px";
-    lander.style.left = "1px";
-  } else if (event.clientX >= right50) {
-    lander.style.width = "50px";
-    lander.style.height = `${height - twoDoubleBorders}px`;
-    lander.style.top = "1px";
-    lander.style.left = `${right50 - doubleBorder - border}px`;
-  } else {
-    lander.style.width = "50%";
-    lander.style.height = `${height - twoDoubleBorders}px`;
-    lander.style.top = "1px";
-    lander.style.left = "1px";
+    lander.style.height = `${halfHeight - doubleBorder}px`;
+    lander.style.top = `${rect.y + halfHeight}px`;
+    lander.style.left = `${rect.x + doubleBorder}px`;
+    lander.id = "bottom-row";
   }
 };
