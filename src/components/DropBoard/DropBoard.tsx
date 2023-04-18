@@ -100,19 +100,24 @@ export const DropBoard = () => {
       if (
         (arr[i] as configType)?.content?.some((el) => el.type === arr[i].type)
       ) {
-        const index = (arr[i] as configType)?.content?.findIndex(
-          (el) => el.type === arr[i].type
-        );
+        const content = (arr[i] as configType)?.content;
 
-        ((arr[i] as configType)?.content[index] as configType).content.every(
-          (el) => (el.parentId = arr[i].id)
-        );
+        for (let j = 0; j < content.length; j ++) {
+          if (content[j].type === arr[i].type) {
 
-        (arr[i] as configType)?.content.splice(
-          index,
-          1,
-          ...((arr[i] as configType)?.content[index] as configType).content
-        );
+            (content[j] as configType).content.every(
+              (el) => (el.parentId = arr[i].id)
+            );
+
+            content.splice(
+              j,
+              1,
+              ...(content[j] as configType).content
+            );
+
+            j--;
+          }
+        }
       }
     }
   };
