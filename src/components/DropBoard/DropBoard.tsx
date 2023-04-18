@@ -77,6 +77,12 @@ export const DropBoard = () => {
         arr[i].parentId = 'top-parent';
       }
 
+      if ((arr[i] as configType)?.content && (arr[i] as configType)?.content.length === 1 && (arr[i] as configType)?.content.every(el => el.type === 'component')) {
+        (arr[i] as configType).content[0].parentId = arr[i].parentId;
+
+        arr[i] = (arr[i] as configType).content[0];
+      }
+
       if ((arr[i] as configType)?.content?.some(el => el.type === arr[i].type)) {
         const index = (arr[i] as configType)?.content?.findIndex(el => el.type === arr[i].type);
 
