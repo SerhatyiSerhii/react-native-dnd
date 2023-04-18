@@ -62,36 +62,60 @@ export const DropBoard = () => {
 
   const configFilter = function (arr: (configType | componentType)[]) {
     for (let i = 0; i < arr.length; i++) {
-      if ((arr[i] as configType)?.content && (arr[i] as configType)?.content.length === 0) {
+      if (
+        (arr[i] as configType)?.content &&
+        (arr[i] as configType)?.content.length === 0
+      ) {
         arr.splice(i, 1);
         i--;
       }
 
-      if ((arr[i] as configType)?.content && (arr[i] as configType)?.content.length) {
+      if (
+        (arr[i] as configType)?.content &&
+        (arr[i] as configType)?.content.length
+      ) {
         configFilter((arr[i] as configType)?.content);
       }
 
-      if ((arr[i] as configType)?.content && (arr[i] as configType)?.content.length === 1 && (arr[i] as configType)?.content.every(el => el.type !== 'component')) {
+      if (
+        (arr[i] as configType)?.content &&
+        (arr[i] as configType)?.content.length === 1 &&
+        (arr[i] as configType)?.content.every((el) => el.type !== "component")
+      ) {
         arr[i] = (arr[i] as configType)?.content[0];
 
-        arr[i].parentId = 'top-parent';
+        arr[i].parentId = "top-parent";
       }
 
-      if ((arr[i] as configType)?.content && (arr[i] as configType)?.content.length === 1 && (arr[i] as configType)?.content.every(el => el.type === 'component')) {
+      if (
+        (arr[i] as configType)?.content &&
+        (arr[i] as configType)?.content.length === 1 &&
+        (arr[i] as configType)?.content.every((el) => el.type === "component")
+      ) {
         (arr[i] as configType).content[0].parentId = arr[i].parentId;
 
         arr[i] = (arr[i] as configType).content[0];
       }
 
-      if ((arr[i] as configType)?.content?.some(el => el.type === arr[i].type)) {
-        const index = (arr[i] as configType)?.content?.findIndex(el => el.type === arr[i].type);
+      if (
+        (arr[i] as configType)?.content?.some((el) => el.type === arr[i].type)
+      ) {
+        const index = (arr[i] as configType)?.content?.findIndex(
+          (el) => el.type === arr[i].type
+        );
 
-        ((arr[i] as configType)?.content[index] as configType).content.every(el => el.parentId = arr[i].id);
+        ((arr[i] as configType)?.content[index] as configType).content.every(
+          (el) => (el.parentId = arr[i].id)
+        );
 
-        (arr[i] as configType)?.content.splice(index, 1, ...((arr[i] as configType)?.content[index] as configType).content);
+        (arr[i] as configType)?.content.splice(
+          index,
+          1,
+          ...((arr[i] as configType)?.content[index] as configType).content
+        );
       }
     }
-  }
+  };
 
   const findParent = function (
     arr: (configType | componentType)[],
@@ -112,6 +136,40 @@ export const DropBoard = () => {
     }
   };
 
+  const filter = function (arr: (configType | componentType)[]) {
+    return arr.filter((item) => {
+      if ((item as configType).content) {
+        (item as configType).content = filter((item as configType).content);
+      }
+
+      return item.id !== currentEl?.id;
+    });
+  };
+
+  const findTargetElIndex = function (
+    arr: (configType | componentType)[],
+    targetElem: componentType
+  ): number {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id === targetElem.id) {
+        return i;
+      }
+
+      if ((arr[i] as configType)?.content) {
+        const target = findTargetElIndex(
+          (arr[i] as configType).content,
+          targetElem
+        );
+
+        if (target >= 0) {
+          return target;
+        }
+      }
+    }
+
+    return -1;
+  };
+
   const handleDrop = (event: React.DragEvent, targetElem: componentType) => {
     event.preventDefault();
 
@@ -121,46 +179,23 @@ export const DropBoard = () => {
     const lander: HTMLElement | null = document.querySelector(".lander");
 
     if (lander?.id === "right-col") {
-      const filter = function (arr: (configType | componentType)[]) {
-        return arr.filter((item) => {
-          if ((item as configType).content) {
-            (item as configType).content = filter((item as configType).content);
-          }
-
-          return item.id !== currentEl?.id;
-        });
-      };
-
-      const configCopy = filter(JSON.parse(JSON.stringify(config))) as configType[];
+      const configCopy = filter(
+        JSON.parse(JSON.stringify(config))
+      ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const findTargetElIndex = function (
-          arr: (configType | componentType)[]
-        ): number {
+        const targetElIndex = findTargetElIndex(
+          parentElement.content,
+          targetElem
+        );
 
-          for (let i = 0; i < arr.length; i++) {
-            if (arr[i].id === targetElem.id) {
-              return i;
-            }
-
-            if ((arr[i] as configType)?.content) {
-              const target = findTargetElIndex((arr[i] as configType).content);
-
-              if (target >= 0) {
-                return target;
-              }
-            }
-          }
-
-          return -1;
-        };
-
-        const targetElIndex = findTargetElIndex(parentElement.content);
-
-
-        if (parentElement.type === 'column' && !targetElem.parentId.includes("row") && targetElIndex >= 0) {
+        if (
+          parentElement.type === "column" &&
+          !targetElem.parentId.includes("row") &&
+          targetElIndex >= 0
+        ) {
           const row: configType = {
             type: "row",
             id: `row-${rowId + 1}`,
@@ -175,7 +210,10 @@ export const DropBoard = () => {
 
           parentElement.content[targetElIndex] = row;
         } else {
-          const column = findParent(parentElement.content, targetElem) as configType;
+          const column = findParent(
+            parentElement.content,
+            targetElem
+          ) as configType;
 
           if (column) {
             column.content.splice(targetElIndex + 1, 0, currentEl!);
@@ -192,46 +230,23 @@ export const DropBoard = () => {
     }
 
     if (lander?.id === "left-col") {
-      const filter = function (arr: (configType | componentType)[]) {
-        return arr.filter((item) => {
-          if ((item as configType).content) {
-            (item as configType).content = filter((item as configType).content);
-          }
-
-          return item.id !== currentEl?.id;
-        });
-      };
-
-      const configCopy = filter(JSON.parse(JSON.stringify(config))) as configType[];
+      const configCopy = filter(
+        JSON.parse(JSON.stringify(config))
+      ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const findTargetElIndex = function (
-          arr: (configType | componentType)[]
-        ): number {
+        const targetElIndex = findTargetElIndex(
+          parentElement.content,
+          targetElem
+        );
 
-          for (let i = 0; i < arr.length; i++) {
-            if (arr[i].id === targetElem.id) {
-              return i;
-            }
-
-            if ((arr[i] as configType)?.content) {
-              const target = findTargetElIndex((arr[i] as configType).content);
-
-              if (target >= 0) {
-                return target;
-              }
-            }
-          }
-
-          return -1;
-        };
-
-        const targetElIndex = findTargetElIndex(parentElement.content);
-
-
-        if (parentElement.type === 'column' && !targetElem.parentId.includes("row") && targetElIndex >= 0) {
+        if (
+          parentElement.type === "column" &&
+          !targetElem.parentId.includes("row") &&
+          targetElIndex >= 0
+        ) {
           const row: configType = {
             type: "row",
             id: `row-${rowId + 1}`,
@@ -246,7 +261,10 @@ export const DropBoard = () => {
 
           parentElement.content[targetElIndex] = row;
         } else {
-          const column = findParent(parentElement.content, targetElem) as configType;
+          const column = findParent(
+            parentElement.content,
+            targetElem
+          ) as configType;
 
           if (column) {
             column.content.splice(targetElIndex, 0, currentEl!);
@@ -263,16 +281,6 @@ export const DropBoard = () => {
     }
 
     if (lander?.id === "bottom-row") {
-      const filter = function (arr: (configType | componentType)[]) {
-        return arr.filter((item) => {
-          if ((item as configType).content) {
-            (item as configType).content = filter((item as configType).content);
-          }
-
-          return item.id !== currentEl?.id;
-        });
-      };
-
       const configCopy = filter(
         JSON.parse(JSON.stringify(config))
       ) as configType[];
@@ -280,31 +288,16 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const findTargetElIndex = function (
-          arr: (configType | componentType)[]
-        ): number {
+        const targetElIndex = findTargetElIndex(
+          parentElement.content,
+          targetElem
+        );
 
-          for (let i = 0; i < arr.length; i++) {
-            if (arr[i].id === targetElem.id) {
-              return i;
-            }
-
-            if ((arr[i] as configType)?.content) {
-              const target = findTargetElIndex((arr[i] as configType).content);
-
-              if (target >= 0) {
-                return target;
-              }
-            }
-          }
-
-          return -1;
-        };
-
-        const targetElIndex = findTargetElIndex(parentElement.content);
-
-
-        if (parentElement.type === 'row' && !targetElem.parentId.includes("column") && targetElIndex >= 0) {
+        if (
+          parentElement.type === "row" &&
+          !targetElem.parentId.includes("column") &&
+          targetElIndex >= 0
+        ) {
           const column: configType = {
             type: "column",
             id: `column-${columnId + 1}`,
@@ -319,7 +312,10 @@ export const DropBoard = () => {
 
           parentElement.content[targetElIndex] = column;
         } else {
-          const row = findParent(parentElement.content, targetElem) as configType;
+          const row = findParent(
+            parentElement.content,
+            targetElem
+          ) as configType;
 
           if (row) {
             row.content.splice(targetElIndex, 0, currentEl!);
@@ -342,21 +338,20 @@ export const DropBoard = () => {
     setDragginEl(null);
   };
 
-  const handleDragOver =
-    (event: React.DragEvent) => {
-      event.preventDefault();
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
 
-      const lander: HTMLElement | null = document.querySelector(".lander");
+    const lander: HTMLElement | null = document.querySelector(".lander");
 
-      (draggingEl as HTMLElement).style.top = event.clientY + "px";
-      (draggingEl as HTMLElement).style.left = event.clientX + "px";
-      (draggingEl as HTMLElement).style.transform = "scale(0.1)";
-      (draggingEl as HTMLElement).style.transformOrigin = "0 0";
+    (draggingEl as HTMLElement).style.top = event.clientY + "px";
+    (draggingEl as HTMLElement).style.left = event.clientX + "px";
+    (draggingEl as HTMLElement).style.transform = "scale(0.1)";
+    (draggingEl as HTMLElement).style.transformOrigin = "0 0";
 
-      const rect = (event.target as HTMLElement).getBoundingClientRect();
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
 
-      landerRenderer(lander!, event, rect!);
-    };
+    landerRenderer(lander!, event, rect!);
+  };
 
   const handleDragStart = (
     event: React.DragEvent,
@@ -366,7 +361,7 @@ export const DropBoard = () => {
     const parentNode = (event.target as HTMLElement).parentNode as HTMLElement;
 
     if (parentNode?.childElementCount === 1) {
-      setTimeout(() =>parentNode.classList.add('zero-dimentions'), 0);
+      setTimeout(() => parentNode.classList.add("zero-dimentions"), 0);
     }
 
     event.dataTransfer.setData("widgetType", widgetType);
