@@ -71,3 +71,8 @@ html, body, #root, .container, .manager, .stack, .row {
     flex-direction: column;
     height: 100%;
 }
+
+.zero-dimentions {
+    width: 0;
+    height: 0;
+}

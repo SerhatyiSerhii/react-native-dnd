@@ -153,6 +153,10 @@ export const DropBoard = () => {
       }
 
       setConfig(configCopy.map(item => {
+        if (item.content) {
+          item.content = item.content.filter((contentItem) => (contentItem as configType).content?.length !== 0);
+        }
+
         if (item.content.length === 1 && (item.type === 'row' || item.type === 'column')) {
           item.content[0].parentId = 'top-parent';
           return item.content[0];
@@ -247,6 +251,10 @@ export const DropBoard = () => {
       }
 
       setConfig(configCopy.map(item => {
+        if (item.content) {
+          item.content = item.content.filter((contentItem) => (contentItem as configType).content?.length !== 0);
+        }
+
         if (item.content.length === 1 && (item.type === 'row' || item.type === 'column')) {
           item.content[0].parentId = 'top-parent';
           return item.content[0];
@@ -343,6 +351,10 @@ export const DropBoard = () => {
       }
 
       setConfig(configCopy.map(item => {
+        if (item.content) {
+          item.content = item.content.filter((contentItem) => (contentItem as configType).content?.length !== 0);
+        }
+
         if (item.content.length === 1 && (item.type === 'row' || item.type === 'column')) {
           item.content[0].parentId = 'top-parent';
           return item.content[0];
@@ -380,6 +392,12 @@ export const DropBoard = () => {
     widgetType: string,
     item: componentType
   ) => {
+    const parentNode = (event.target as HTMLElement).parentNode as HTMLElement;
+
+    if (parentNode?.childElementCount === 1) {
+      parentNode.classList.add('zero-dimentions');
+    }
+
     event.dataTransfer.setData("widgetType", widgetType);
     event.dataTransfer.setDragImage(new Image(), 0, 0);
 
