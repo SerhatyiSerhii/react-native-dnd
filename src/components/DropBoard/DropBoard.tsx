@@ -170,6 +170,79 @@ export const DropBoard = () => {
     return -1;
   };
 
+  const insertDraggingEl = (parentElement: configType, targetElem: componentType, landerTarget: string) => {
+    const targetElIndex = findTargetElIndex(
+      parentElement.content,
+      targetElem
+    );
+
+    if (
+      (parentElement.type === "column" || parentElement.type === "row") &&
+      (!targetElem.parentId.includes("row") || !targetElem.parentId.includes("column")) &&
+      targetElIndex >= 0
+    ) {
+      let row: configType | null = null;
+      let column: configType | null = null;
+
+      if (landerTarget.includes('col')) {
+        row = {
+          type: "row",
+          id: `row-${rowId + 1}`,
+          parentId: targetElem.parentId,
+          content: [...landerTarget.includes('right') ? [targetElem, currentEl!] : [currentEl!, targetElem]]
+        };
+
+        setRowId(rowId + 1);
+      }
+
+      if (landerTarget.includes('row')) {
+        column = {
+          type: "column",
+          id: `column-${columnId + 1}`,
+          parentId: targetElem.parentId,
+          content: [...landerTarget.includes('bottom') ? [targetElem, currentEl!] : [currentEl!, targetElem]],
+        };
+
+        setColumnId(columnId + 1);
+      }
+
+      targetElem.parentId = row ? row!.id : column!.id;
+      currentEl!.parentId = row ? row!.id : column!.id;
+
+      parentElement.content[targetElIndex] = row ? row! : column!;
+    } else {
+      let row: configType | null = null;
+      let column: configType | null = null;
+
+      if (landerTarget.includes('col')) {
+        column = findParent(
+          parentElement.content,
+          targetElem
+        ) as configType;
+
+        if (column) {
+          column.content.splice(targetElIndex + (landerTarget.includes('right') ? 1 : 0), 0, currentEl!);
+        }
+      }
+
+      if (landerTarget.includes('row')) {
+        row = findParent(
+          parentElement.content,
+          targetElem
+        ) as configType;
+
+        if (row) {
+          row.content.splice(targetElIndex + (landerTarget.includes('bottom') ? 0 : 1), 0, currentEl!);
+        }
+      }
+
+      if (!column || !row) {
+        currentEl!.parentId = targetElem.parentId;
+        parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
+      }
+    }
+  }
+
   const handleDrop = (event: React.DragEvent, targetElem: componentType) => {
     event.preventDefault();
 
@@ -186,42 +259,7 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const targetElIndex = findTargetElIndex(
-          parentElement.content,
-          targetElem
-        );
-
-        if (
-          parentElement.type === "column" &&
-          !targetElem.parentId.includes("row") &&
-          targetElIndex >= 0
-        ) {
-          const row: configType = {
-            type: "row",
-            id: `row-${rowId + 1}`,
-            parentId: targetElem.parentId,
-            content: [targetElem, currentEl!],
-          };
-
-          setRowId(rowId + 1);
-
-          targetElem.parentId = row.id;
-          currentEl!.parentId = row.id;
-
-          parentElement.content[targetElIndex] = row;
-        } else {
-          const column = findParent(
-            parentElement.content,
-            targetElem
-          ) as configType;
-
-          if (column) {
-            column.content.splice(targetElIndex + 1, 0, currentEl!);
-          } else {
-            currentEl!.parentId = targetElem.parentId;
-            parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
-          }
-        }
+        insertDraggingEl(parentElement, targetElem, lander?.id);
       }
 
       configFilter(configCopy);
@@ -237,42 +275,7 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const targetElIndex = findTargetElIndex(
-          parentElement.content,
-          targetElem
-        );
-
-        if (
-          parentElement.type === "column" &&
-          !targetElem.parentId.includes("row") &&
-          targetElIndex >= 0
-        ) {
-          const row: configType = {
-            type: "row",
-            id: `row-${rowId + 1}`,
-            parentId: targetElem.parentId,
-            content: [currentEl!, targetElem],
-          };
-
-          setRowId(rowId + 1);
-
-          targetElem.parentId = row.id;
-          currentEl!.parentId = row.id;
-
-          parentElement.content[targetElIndex] = row;
-        } else {
-          const column = findParent(
-            parentElement.content,
-            targetElem
-          ) as configType;
-
-          if (column) {
-            column.content.splice(targetElIndex, 0, currentEl!);
-          } else {
-            currentEl!.parentId = targetElem.parentId;
-            parentElement.content.splice(targetElIndex, 0, currentEl!);
-          }
-        }
+        insertDraggingEl(parentElement, targetElem, lander?.id);
       }
 
       configFilter(configCopy);
@@ -288,42 +291,23 @@ export const DropBoard = () => {
       const parentElement = findParent(configCopy, targetElem) as configType;
 
       if (parentElement) {
-        const targetElIndex = findTargetElIndex(
-          parentElement.content,
-          targetElem
-        );
+        insertDraggingEl(parentElement, targetElem, lander?.id);
+      }
 
-        if (
-          parentElement.type === "row" &&
-          !targetElem.parentId.includes("column") &&
-          targetElIndex >= 0
-        ) {
-          const column: configType = {
-            type: "column",
-            id: `column-${columnId + 1}`,
-            parentId: targetElem.parentId,
-            content: [targetElem, currentEl!],
-          };
+      configFilter(configCopy);
 
-          setColumnId(columnId + 1);
+      setConfig(configCopy);
+    }
 
-          targetElem.parentId = column.id;
-          currentEl!.parentId = column.id;
+    if (lander?.id === "top-row") {
+      const configCopy = filter(
+        JSON.parse(JSON.stringify(config))
+      ) as configType[];
 
-          parentElement.content[targetElIndex] = column;
-        } else {
-          const row = findParent(
-            parentElement.content,
-            targetElem
-          ) as configType;
+      const parentElement = findParent(configCopy, targetElem) as configType;
 
-          if (row) {
-            row.content.splice(targetElIndex, 0, currentEl!);
-          } else {
-            currentEl!.parentId = targetElem.parentId;
-            parentElement.content.splice(targetElIndex, 0, currentEl!);
-          }
-        }
+      if (parentElement) {
+        insertDraggingEl(parentElement, targetElem, lander?.id);
       }
 
       configFilter(configCopy);
