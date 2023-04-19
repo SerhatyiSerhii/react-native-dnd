@@ -15,6 +15,7 @@ type componentType = {
   componentState: { label: string };
   id: string;
   parentId: string;
+  active: boolean;
 };
 
 export const DropBoard = () => {
@@ -24,8 +25,8 @@ export const DropBoard = () => {
   const [rowId, setRowId] = useState<number>(1);
   const [config, setConfig] = useState<configType[]>([
     {
-      type: "row",
-      id: "row-1",
+      type: "stack",
+      id: "stack-1",
       parentId: "top-parent",
       content: [
         {
@@ -33,28 +34,32 @@ export const DropBoard = () => {
           componentName: "test_name",
           componentState: { label: "A" },
           id: "1",
-          parentId: "row-1",
+          parentId: "stack-1",
+          active: true,
         },
         {
           type: "component",
           componentName: "test_name",
           componentState: { label: "B" },
           id: "2",
-          parentId: "row-1",
+          parentId: "stack-1",
+          active: false,
         },
         {
           type: "component",
           componentName: "test_name",
           componentState: { label: "C" },
           id: "3",
-          parentId: "row-1",
+          parentId: "stack-1",
+          active: false,
         },
         {
           type: "component",
           componentName: "test_name",
           componentState: { label: "D" },
           id: "4",
-          parentId: "row-1",
+          parentId: "stack-1",
+          active: false,
         },
       ],
     },
@@ -368,9 +373,28 @@ export const DropBoard = () => {
     (event.target as HTMLElement).style.pointerEvents = "none";
   };
 
+  const drowStack = (arr: (configType | componentType)[]) => {
+    const activeEl = arr.find((el) => (el as componentType)?.active);
+
+    if (activeEl) {
+      return (
+        <div
+          id={activeEl.id}
+          className={`t q${activeEl.id}`}
+          onDragOver={(e) => handleDragOver(e)}
+          onDrop={(e) =>
+            handleDrop(e, activeEl as componentType)
+          }
+        >
+          Active element;
+        </div>
+      );
+    }
+  }
+
   const drowElements = (arr: (componentType | configType)[]) => {
     return arr.map((item) => {
-      if (item.type === "stack" || item.type === "row") {
+      if (item.type === "row" || item.type === "column") {
         return (
           <div key={item.id} className={item.type}>
             {drowElements((item as configType).content)}
@@ -378,10 +402,15 @@ export const DropBoard = () => {
         );
       }
 
-      if (item.type === "column") {
+      if (item.type === "stack") {
         return (
           <div key={item.id} className={item.type}>
-            {drowElements((item as configType).content)}
+            <div className="stack-header">
+              {drowElements((item as configType).content)}
+            </div>
+            {
+              drowStack((item as configType).content)
+            }
           </div>
         );
       }
@@ -397,7 +426,11 @@ export const DropBoard = () => {
           onDragOver={(e) => handleDragOver(e)}
           onDrag={dissablePointerEvents}
           onDrop={(e) => handleDrop(e, item as componentType)}
-        ></div>
+        >
+          <div className={(item as componentType)?.active ? " active" : ""}>
+            {(item as componentType).componentState.label}
+          </div>
+        </div>
       );
     });
   };
