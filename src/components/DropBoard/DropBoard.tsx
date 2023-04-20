@@ -1,24 +1,13 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 import "./DropBoard.scss";
-
-type configType = {
-  type: string;
-  id: string;
-  parentId: string;
-  content: (configType | componentType)[];
-};
-
-type componentType = {
-  type: string;
-  componentName: string;
-  componentState: { label: string };
-  id: string;
-  parentId: string;
-  active: boolean;
-};
+import { componentType, configType } from "../../utils/types";
+import { configFilter } from "../../utils/helpers/configFilter";
 
 export const DropBoard = () => {
+  const managerRef = useRef<HTMLDivElement>(null);
+  const landerRef = useRef<HTMLDivElement>(null);
+
   const [draggingEl, setDragginEl] = useState<EventTarget | null>(null);
   const [currentEl, setCurrentEl] = useState<componentType | null>(null);
   const [columnId, setColumnId] = useState<number>(0);
@@ -64,68 +53,6 @@ export const DropBoard = () => {
       ],
     },
   ]);
-
-  const configFilter = function (arr: (configType | componentType)[]) {
-    for (let i = 0; i < arr.length; i++) {
-      if (
-        (arr[i] as configType)?.content &&
-        (arr[i] as configType)?.content.length === 0
-      ) {
-        arr.splice(i, 1);
-        i--;
-      }
-
-      if (
-        (arr[i] as configType)?.content &&
-        (arr[i] as configType)?.content.length
-      ) {
-        configFilter((arr[i] as configType)?.content);
-      }
-
-      if (
-        (arr[i] as configType)?.content &&
-        (arr[i] as configType)?.content.length === 1 &&
-        (arr[i] as configType)?.content.every((el) => el.type !== "component")
-      ) {
-        arr[i] = (arr[i] as configType)?.content[0];
-
-        arr[i].parentId = "top-parent";
-      }
-
-      if (
-        (arr[i] as configType)?.content &&
-        (arr[i] as configType)?.content.length === 1 &&
-        (arr[i] as configType)?.content.every((el) => el.type === "component")
-      ) {
-        (arr[i] as configType).content[0].parentId = arr[i].parentId;
-
-        arr[i] = (arr[i] as configType).content[0];
-      }
-
-      if (
-        (arr[i] as configType)?.content?.some((el) => el.type === arr[i].type)
-      ) {
-        const content = (arr[i] as configType)?.content;
-
-        for (let j = 0; j < content.length; j ++) {
-          if (content[j].type === arr[i].type) {
-
-            (content[j] as configType).content.every(
-              (el) => (el.parentId = arr[i].id)
-            );
-
-            content.splice(
-              j,
-              1,
-              ...(content[j] as configType).content
-            );
-
-            j--;
-          }
-        }
-      }
-    }
-  };
 
   const findParent = function (
     arr: (configType | componentType)[],
@@ -259,7 +186,7 @@ export const DropBoard = () => {
     const element_id = event.dataTransfer.getData("widgetType");
     const element = document.getElementsByClassName(element_id).item(0)!;
 
-    const lander: HTMLElement | null = document.querySelector(".lander");
+    const lander: HTMLElement | null = landerRef.current;
 
     if (lander?.id === "right-col") {
       const configCopy = filter(
@@ -327,7 +254,7 @@ export const DropBoard = () => {
 
     element.removeAttribute("style");
 
-    document.querySelector(".manager")?.classList.remove("dragging");
+    managerRef.current?.classList.remove("dragging");
 
     setDragginEl(null);
   };
@@ -335,12 +262,10 @@ export const DropBoard = () => {
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
 
-    const lander: HTMLElement | null = document.querySelector(".lander");
+    const lander: HTMLElement | null = landerRef.current;
 
     (draggingEl as HTMLElement).style.top = event.clientY + "px";
     (draggingEl as HTMLElement).style.left = event.clientX + "px";
-    (draggingEl as HTMLElement).style.transform = "scale(0.1)";
-    (draggingEl as HTMLElement).style.transformOrigin = "0 0";
 
     const rect = (event.target as HTMLElement).getBoundingClientRect();
 
@@ -365,32 +290,41 @@ export const DropBoard = () => {
     setCurrentEl(JSON.parse(JSON.stringify(item)));
 
     (event.target as HTMLElement).style.position = "absolute";
+    (event.target as HTMLElement).style.top = event.clientY + "px";
+    (event.target as HTMLElement).style.left = event.clientX + "px";
+    (event.target as HTMLElement).style.maxHeight = 300 + "px";
+    (event.target as HTMLElement).style.maxWidth = 300 + "px";
 
-    document.querySelector(".manager")?.classList.add("dragging");
+    managerRef.current?.classList.add("dragging");
   };
 
   const dissablePointerEvents = (event: React.DragEvent) => {
     (event.target as HTMLElement).style.pointerEvents = "none";
   };
 
-  const drowStack = (arr: (configType | componentType)[]) => {
-    const activeEl = arr.find((el) => (el as componentType)?.active);
-
-    if (activeEl) {
-      return (
+  const drowStack = (item: componentType) => {
+    return (
+      <div
+        key={item.id}
+        className={`drag-item q${item.id}`}
+        draggable={item.parentId.includes('stack')}
+        onDragStart={(e) =>
+          handleDragStart(e, `drag-item q${item.id}`, item as componentType)
+        }
+        onDragOver={(e) => handleDragOver(e)}
+        onDrag={dissablePointerEvents}
+        onDrop={(e) => handleDrop(e, item as componentType)}
+      >
         <div
-          id={activeEl.id}
-          className={`t q${activeEl.id}`}
-          onDragOver={(e) => handleDragOver(e)}
-          onDrop={(e) =>
-            handleDrop(e, activeEl as componentType)
+          className={
+            "title" + ((item as componentType)?.active ? " active" : "")
           }
         >
-          Active element;
+          {(item as componentType).componentState.label}
         </div>
-      );
-    }
-  }
+      </div>
+    );
+  };
 
   const drowElements = (arr: (componentType | configType)[]) => {
     return arr.map((item) => {
@@ -406,11 +340,15 @@ export const DropBoard = () => {
         return (
           <div key={item.id} className={item.type}>
             <div className="stack-header">
-              {drowElements((item as configType).content)}
+              {
+                (item as configType).content.map(el => drowStack(el as componentType))
+              }
             </div>
-            {
-              drowStack((item as configType).content)
-            }
+            <div className="stack-body">
+              {
+                drowElements((item as configType).content)
+              }
+            </div>
           </div>
         );
       }
@@ -418,8 +356,8 @@ export const DropBoard = () => {
       return (
         <div
           key={item.id}
-          className={`drag-item q${item.id}`}
-          draggable
+          className={`drag-item q${item.id + (!(item as componentType)?.active ? ' hidden' : '')}`}
+          draggable={!item.parentId.includes('stack')}
           onDragStart={(e) =>
             handleDragStart(e, `drag-item q${item.id}`, item as componentType)
           }
@@ -427,9 +365,6 @@ export const DropBoard = () => {
           onDrag={dissablePointerEvents}
           onDrop={(e) => handleDrop(e, item as componentType)}
         >
-          <div className={(item as componentType)?.active ? " active" : ""}>
-            {(item as componentType).componentState.label}
-          </div>
         </div>
       );
     });
@@ -437,9 +372,9 @@ export const DropBoard = () => {
 
   return (
     <div className="container">
-      <div className="manager">
+      <div className="manager" ref={managerRef}>
         {drowElements(config)}
-        <div className="lander" />
+        <div className="lander" ref={landerRef}/>
       </div>
     </div>
   );
