@@ -28,16 +28,6 @@ export const configFilter = function (arr: (configType | componentType)[]) {
       }
 
       if (
-        (arr[i] as configType)?.content &&
-        (arr[i] as configType)?.content.length === 1 &&
-        (arr[i] as configType)?.content.every((el) => el.type === "component")
-      ) {
-        (arr[i] as configType).content[0].parentId = arr[i].parentId;
-
-        arr[i] = (arr[i] as configType).content[0];
-      }
-
-      if (
         (arr[i] as configType)?.content?.some((el) => el.type === arr[i].type)
       ) {
         const content = (arr[i] as configType)?.content;

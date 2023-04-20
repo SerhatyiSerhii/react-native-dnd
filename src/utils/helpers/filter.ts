@@ -5,9 +5,11 @@ export const filter = function (
   targetEl: componentType
 ) {
   return arr.filter((item) => {
-    if ((item as configType).content) {
-      (item as configType).content = filter(
-        (item as configType).content,
+    const configItem = item as configType;
+
+    if (configItem.content) {
+      configItem.content = filter(
+        configItem.content,
         targetEl
       );
     }

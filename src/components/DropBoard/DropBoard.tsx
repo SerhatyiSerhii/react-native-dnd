@@ -14,7 +14,8 @@ export const DropBoard = () => {
   const [draggingEl, setDragginEl] = useState<EventTarget | null>(null);
   const [currentEl, setCurrentEl] = useState<componentType | null>(null);
   const [columnId, setColumnId] = useState<number>(0);
-  const [rowId, setRowId] = useState<number>(1);
+  const [rowId, setRowId] = useState<number>(0);
+  const [stackId, setStackId] = useState<number>(1);
   const [config, setConfig] = useState<configType[]>([
     {
       type: "stack",
@@ -63,6 +64,8 @@ export const DropBoard = () => {
     landerTarget: string
   ) => {
     const targetElIndex = findTargetElIndex(parentElement.content, targetElem);
+    let row: configType | null = null;
+    let column: configType | null = null;
 
     if (
       (parentElement.type === "column" || parentElement.type === "row") &&
@@ -70,8 +73,6 @@ export const DropBoard = () => {
         !targetElem.parentId.includes("column")) &&
       targetElIndex >= 0
     ) {
-      let row: configType | null = null;
-      let column: configType | null = null;
 
       if (landerTarget.includes("col")) {
         row = {
@@ -107,9 +108,44 @@ export const DropBoard = () => {
       currentEl!.parentId = row ? row!.id : column!.id;
 
       parentElement.content[targetElIndex] = row ? row! : column!;
+    } else if (parentElement.type === "stack") {
+
+      if (landerTarget.includes("col")) {
+        const newRowId = `row-${rowId + 1}`;
+        const parentCopy: configType = JSON.parse(JSON.stringify(parentElement));
+
+        const stack: configType = {
+          type: "stack",
+          id: `stack-${stackId + 1}`,
+          parentId: newRowId,
+          content: [currentEl!]
+        }
+
+        currentEl!.parentId = stack.id;
+
+        row = {
+          type: "row",
+          id: newRowId,
+          parentId: parentElement.parentId,
+          content: [
+            ...(landerTarget.includes("right")
+            ? [parentCopy, stack]
+            : [stack, parentCopy])
+          ]
+        };
+
+        parentCopy.parentId = row.id;
+
+        setRowId(rowId + 1);
+        setStackId(stackId + 1);
+
+        parentElement.type = row.type;
+        parentElement.id = row.id;
+        parentElement.parentId = row.parentId;
+        parentElement.content = row.content;
+      }
+
     } else {
-      let row: configType | null = null;
-      let column: configType | null = null;
 
       if (landerTarget.includes("col")) {
         column = findParent(parentElement.content, targetElem) as configType;
@@ -283,18 +319,24 @@ export const DropBoard = () => {
   const setActiveStackLabel = (elConfig: componentType) => {
       const configCopy = JSON.parse(JSON.stringify(config));
 
-      const parent= findParent(configCopy, elConfig);
-      const content = (parent as configType)?.content;
+      const toggleActive = function (arr: (configType | componentType)[]) {
+        for (let i = 0; i < arr?.length; i++) {
+          const componentType = (arr[i] as componentType);
+          const configType = (arr[i] as configType);
 
-      for (let i = 0; i < content?.length; i++) {
-        const component = (content[i] as componentType);
+          if (componentType.id === elConfig.id) {
+            componentType.active = true;
+          } else {
+            componentType.active = false;
+          }
 
-        if (component.id === elConfig.id) {
-          component.active = true;
-        } else {
-          component.active = false;
+          if (configType.content) {
+            toggleActive(configType.content);
+          }
         }
       }
+
+      toggleActive(configCopy);
 
       setConfig(configCopy);
   }
@@ -345,12 +387,12 @@ export const DropBoard = () => {
     );
   };
 
-  const drowElements = (arr: (componentType | configType)[]) => {
-    return arr.map((item) => {
+  const drowElements = (arr: (componentType | configType)[], arrLength: number) => {
+    return arr.map((item, index) => {
       if (item.type === "row" || item.type === "column") {
         return (
           <div key={item.id} className={item.type}>
-            {drowElements((item as configType).content)}
+            {drowElements((item as configType).content, (item as configType).content.length)}
           </div>
         );
       }
@@ -364,7 +406,7 @@ export const DropBoard = () => {
               )}
             </div>
             <div className="stack-body">
-              {drowElements((item as configType).content)}
+              {drowElements((item as configType).content, (item as configType).content.length)}
             </div>
           </div>
         );
@@ -374,7 +416,7 @@ export const DropBoard = () => {
         <div
           key={item.id}
           className={`stack-body-item q${
-            item.id + (!(item as componentType)?.active ? " hidden" : "")
+            item.id + (index > 0 && arrLength > 1 ? " hidden" : "")
           }`}
           draggable={!item.parentId.includes("stack")}
           onDragStart={(e) =>
@@ -395,7 +437,7 @@ export const DropBoard = () => {
   return (
     <div className="container">
       <div className="manager" ref={managerRef}>
-        {drowElements(config)}
+        {drowElements(config, config.length)}
         <div className="lander" ref={landerRef} />
       </div>
     </div>
