@@ -3,6 +3,9 @@ import { landerRenderer } from "../../utils/helpers/lenderRenderer";
 import "./DropBoard.scss";
 import { componentType, configType } from "../../utils/types";
 import { configFilter } from "../../utils/helpers/configFilter";
+import { findParent } from "../../utils/helpers/findParent";
+import { filter } from "../../utils/helpers/filter";
+import { findTargetElIndex } from "../../utils/helpers/findTargetElIndex";
 
 export const DropBoard = () => {
   const managerRef = useRef<HTMLDivElement>(null);
@@ -54,90 +57,47 @@ export const DropBoard = () => {
     },
   ]);
 
-  const findParent = function (
-    arr: (configType | componentType)[],
-    targetElem: componentType
-  ): configType | componentType | undefined {
-    for (let i of arr) {
-      if (i.id === targetElem.parentId) {
-        return i;
-      }
-
-      if ((i as configType)?.content) {
-        const target = findParent((i as configType).content, targetElem);
-
-        if (target) {
-          return target;
-        }
-      }
-    }
-  };
-
-  const filter = function (arr: (configType | componentType)[]) {
-    return arr.filter((item) => {
-      if ((item as configType).content) {
-        (item as configType).content = filter((item as configType).content);
-      }
-
-      return item.id !== currentEl?.id;
-    });
-  };
-
-  const findTargetElIndex = function (
-    arr: (configType | componentType)[],
-    targetElem: componentType
-  ): number {
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].id === targetElem.id) {
-        return i;
-      }
-
-      if ((arr[i] as configType)?.content) {
-        const target = findTargetElIndex(
-          (arr[i] as configType).content,
-          targetElem
-        );
-
-        if (target >= 0) {
-          return target;
-        }
-      }
-    }
-
-    return -1;
-  };
-
-  const insertDraggingEl = (parentElement: configType, targetElem: componentType, landerTarget: string) => {
-    const targetElIndex = findTargetElIndex(
-      parentElement.content,
-      targetElem
-    );
+  const insertDraggingEl = (
+    parentElement: configType,
+    targetElem: componentType,
+    landerTarget: string
+  ) => {
+    const targetElIndex = findTargetElIndex(parentElement.content, targetElem);
 
     if (
       (parentElement.type === "column" || parentElement.type === "row") &&
-      (!targetElem.parentId.includes("row") || !targetElem.parentId.includes("column")) &&
+      (!targetElem.parentId.includes("row") ||
+        !targetElem.parentId.includes("column")) &&
       targetElIndex >= 0
     ) {
       let row: configType | null = null;
       let column: configType | null = null;
 
-      if (landerTarget.includes('col')) {
+      if (landerTarget.includes("col")) {
         row = {
           type: "row",
           id: `row-${rowId + 1}`,
           parentId: targetElem.parentId,
-          content: [...landerTarget.includes('right') ? [targetElem, currentEl!] : [currentEl!, targetElem]]
+          content: [
+            ...(landerTarget.includes("right")
+              ? [targetElem, currentEl!]
+              : [currentEl!, targetElem]),
+          ],
         };
 
         setRowId(rowId + 1);
       }
 
-      if (landerTarget.includes('row')) {
+      if (landerTarget.includes("row")) {
         column = {
           type: "column",
           id: `column-${columnId + 1}`,
           parentId: targetElem.parentId,
-          content: [...landerTarget.includes('bottom') ? [targetElem, currentEl!] : [currentEl!, targetElem]],
+          content: [
+            ...(landerTarget.includes("bottom")
+              ? [targetElem, currentEl!]
+              : [currentEl!, targetElem]),
+          ],
         };
 
         setColumnId(columnId + 1);
@@ -151,25 +111,27 @@ export const DropBoard = () => {
       let row: configType | null = null;
       let column: configType | null = null;
 
-      if (landerTarget.includes('col')) {
-        column = findParent(
-          parentElement.content,
-          targetElem
-        ) as configType;
+      if (landerTarget.includes("col")) {
+        column = findParent(parentElement.content, targetElem) as configType;
 
         if (column) {
-          column.content.splice(targetElIndex + (landerTarget.includes('right') ? 1 : 0), 0, currentEl!);
+          column.content.splice(
+            targetElIndex + (landerTarget.includes("right") ? 1 : 0),
+            0,
+            currentEl!
+          );
         }
       }
 
-      if (landerTarget.includes('row')) {
-        row = findParent(
-          parentElement.content,
-          targetElem
-        ) as configType;
+      if (landerTarget.includes("row")) {
+        row = findParent(parentElement.content, targetElem) as configType;
 
         if (row) {
-          row.content.splice(targetElIndex + (landerTarget.includes('bottom') ? 0 : 1), 0, currentEl!);
+          row.content.splice(
+            targetElIndex + (landerTarget.includes("bottom") ? 0 : 1),
+            0,
+            currentEl!
+          );
         }
       }
 
@@ -178,7 +140,7 @@ export const DropBoard = () => {
         parentElement.content.splice(targetElIndex + 1, 0, currentEl!);
       }
     }
-  }
+  };
 
   const handleDrop = (event: React.DragEvent, targetElem: componentType) => {
     event.preventDefault();
@@ -190,7 +152,8 @@ export const DropBoard = () => {
 
     if (lander?.id === "right-col") {
       const configCopy = filter(
-        JSON.parse(JSON.stringify(config))
+        JSON.parse(JSON.stringify(config)),
+        currentEl!
       ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
@@ -206,7 +169,8 @@ export const DropBoard = () => {
 
     if (lander?.id === "left-col") {
       const configCopy = filter(
-        JSON.parse(JSON.stringify(config))
+        JSON.parse(JSON.stringify(config)),
+        currentEl!
       ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
@@ -222,7 +186,8 @@ export const DropBoard = () => {
 
     if (lander?.id === "bottom-row") {
       const configCopy = filter(
-        JSON.parse(JSON.stringify(config))
+        JSON.parse(JSON.stringify(config)),
+        currentEl!
       ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
@@ -238,7 +203,8 @@ export const DropBoard = () => {
 
     if (lander?.id === "top-row") {
       const configCopy = filter(
-        JSON.parse(JSON.stringify(config))
+        JSON.parse(JSON.stringify(config)),
+        currentEl!
       ) as configType[];
 
       const parentElement = findParent(configCopy, targetElem) as configType;
@@ -255,6 +221,7 @@ export const DropBoard = () => {
     element.removeAttribute("style");
 
     managerRef.current?.classList.remove("dragging");
+    (draggingEl as HTMLElement).classList.remove("dragging");
 
     setDragginEl(null);
   };
@@ -277,6 +244,19 @@ export const DropBoard = () => {
     widgetType: string,
     item: componentType
   ) => {
+    const targetConfigParent = findParent(config, item);
+
+    if ((targetConfigParent as configType).content.length > 1 && item.active) {
+      const parent = document.querySelector(`.${item.parentId}`);
+
+      (
+        parent?.lastChild?.childNodes[+item.id - 1] as HTMLElement
+      )?.classList.add("hidden");
+      (
+        parent?.lastChild?.childNodes[+item.id] as HTMLElement
+      )?.classList.remove("hidden");
+    }
+
     const parentNode = (event.target as HTMLElement).parentNode as HTMLElement;
 
     if (parentNode?.childElementCount === 1) {
@@ -289,11 +269,9 @@ export const DropBoard = () => {
     setDragginEl(event.target);
     setCurrentEl(JSON.parse(JSON.stringify(item)));
 
-    (event.target as HTMLElement).style.position = "absolute";
+    (event.target as HTMLElement)?.classList.add("dragging");
     (event.target as HTMLElement).style.top = event.clientY + "px";
     (event.target as HTMLElement).style.left = event.clientX + "px";
-    (event.target as HTMLElement).style.maxHeight = 300 + "px";
-    (event.target as HTMLElement).style.maxWidth = 300 + "px";
 
     managerRef.current?.classList.add("dragging");
   };
@@ -306,10 +284,14 @@ export const DropBoard = () => {
     return (
       <div
         key={item.id}
-        className={`drag-item q${item.id}`}
-        draggable={item.parentId.includes('stack')}
+        className={`stack-header-label q${item.id}`}
+        draggable={item.parentId.includes("stack")}
         onDragStart={(e) =>
-          handleDragStart(e, `drag-item q${item.id}`, item as componentType)
+          handleDragStart(
+            e,
+            `stack-header-label q${item.id}`,
+            item as componentType
+          )
         }
         onDragOver={(e) => handleDragOver(e)}
         onDrag={dissablePointerEvents}
@@ -321,6 +303,23 @@ export const DropBoard = () => {
           }
         >
           {(item as componentType).componentState.label}
+        </div>
+
+        <div className="dragging-preview">
+          <div className="stack-header">
+            <div className={`stack-header-label q${item.id}`}>
+              <div
+                className={
+                  "title" + ((item as componentType)?.active ? " active" : "")
+                }
+              >
+                {(item as componentType).componentState.label}
+              </div>
+            </div>
+          </div>
+          <div className="stack-body">
+            <div className={`stack-body-item q${item.id}`}>Drag preview</div>
+          </div>
         </div>
       </div>
     );
@@ -338,16 +337,14 @@ export const DropBoard = () => {
 
       if (item.type === "stack") {
         return (
-          <div key={item.id} className={item.type}>
+          <div key={item.id} className={`${item.type} ${item.id}`}>
             <div className="stack-header">
-              {
-                (item as configType).content.map(el => drowStack(el as componentType))
-              }
+              {(item as configType).content.map((el) =>
+                drowStack(el as componentType)
+              )}
             </div>
             <div className="stack-body">
-              {
-                drowElements((item as configType).content)
-              }
+              {drowElements((item as configType).content)}
             </div>
           </div>
         );
@@ -356,16 +353,21 @@ export const DropBoard = () => {
       return (
         <div
           key={item.id}
-          className={`drag-item q${item.id + (!(item as componentType)?.active ? ' hidden' : '')}`}
-          draggable={!item.parentId.includes('stack')}
+          className={`stack-body-item q${
+            item.id + (!(item as componentType)?.active ? " hidden" : "")
+          }`}
+          draggable={!item.parentId.includes("stack")}
           onDragStart={(e) =>
-            handleDragStart(e, `drag-item q${item.id}`, item as componentType)
+            handleDragStart(
+              e,
+              `stack-body-item q${item.id}`,
+              item as componentType
+            )
           }
           onDragOver={(e) => handleDragOver(e)}
           onDrag={dissablePointerEvents}
           onDrop={(e) => handleDrop(e, item as componentType)}
-        >
-        </div>
+        ></div>
       );
     });
   };
@@ -374,7 +376,7 @@ export const DropBoard = () => {
     <div className="container">
       <div className="manager" ref={managerRef}>
         {drowElements(config)}
-        <div className="lander" ref={landerRef}/>
+        <div className="lander" ref={landerRef} />
       </div>
     </div>
   );
