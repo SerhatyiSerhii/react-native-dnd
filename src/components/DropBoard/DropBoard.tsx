@@ -145,6 +145,41 @@ export const DropBoard = () => {
         parentElement.content = row.content;
       }
 
+      if (landerTarget.includes("row")) {
+        const newColId = `column-${columnId + 1}`;
+        const parentCopy: configType = JSON.parse(JSON.stringify(parentElement));
+
+        const stack: configType = {
+          type: "stack",
+          id: `stack-${stackId + 1}`,
+          parentId: newColId,
+          content: [currentEl!]
+        }
+
+        currentEl!.parentId = stack.id;
+
+        column = {
+          type: "column",
+          id: newColId,
+          parentId: parentElement.parentId,
+          content: [
+            ...(landerTarget.includes("bottom")
+            ? [parentCopy, stack]
+            : [stack, parentCopy])
+          ]
+        };
+
+        parentCopy.parentId = column.id;
+
+        setColumnId(rowId + 1);
+        setStackId(stackId + 1);
+
+        parentElement.type = column.type;
+        parentElement.id = column.id;
+        parentElement.parentId = column.parentId;
+        parentElement.content = column.content;
+      }
+
     } else {
 
       if (landerTarget.includes("col")) {
@@ -295,8 +330,8 @@ export const DropBoard = () => {
 
     const parentNode = (event.target as HTMLElement).parentNode as HTMLElement;
 
-    if (parentNode?.childElementCount === 1) {
-      setTimeout(() => parentNode.classList.add("zero-dimentions"), 0);
+    if (parentNode.childElementCount === 1) {
+      setTimeout(() => parentNode.closest('.stack')?.classList.add("zero-dimentions"), 0);
     }
 
     event.dataTransfer.setData("widgetType", widgetType);
