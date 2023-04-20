@@ -280,6 +280,25 @@ export const DropBoard = () => {
     (event.target as HTMLElement).style.pointerEvents = "none";
   };
 
+  const setActiveStackLabel = (elConfig: componentType) => {
+      const configCopy = JSON.parse(JSON.stringify(config));
+
+      const parent= findParent(configCopy, elConfig);
+      const content = (parent as configType)?.content;
+
+      for (let i = 0; i < content?.length; i++) {
+        const component = (content[i] as componentType);
+
+        if (component.id === elConfig.id) {
+          component.active = true;
+        } else {
+          component.active = false;
+        }
+      }
+
+      setConfig(configCopy);
+  }
+
   const drowStack = (item: componentType) => {
     return (
       <div
@@ -296,6 +315,7 @@ export const DropBoard = () => {
         onDragOver={(e) => handleDragOver(e)}
         onDrag={dissablePointerEvents}
         onDrop={(e) => handleDrop(e, item as componentType)}
+        onClick={() => setActiveStackLabel(item)}
       >
         <div
           className={
