@@ -67,62 +67,34 @@ export const DropBoard = () => {
     let stack: configType | null = null;
     const parentCopy: configType = JSON.parse(JSON.stringify(targetElParent));
 
+    const newEl: configType = {
+      type: landerTarget.includes("col") ? "row": "column",
+      id: `${landerTarget.includes("col") ? 'row' : 'column'}-${(landerTarget.includes("col") ? rowId : columnId) + 1}`,
+      parentId: targetElParent.parentId,
+      content: []
+    };
+
     if (targetElParent.type === "stack" && targetElParent.parentId === 'top-parent') {
-      if (landerTarget.includes("col")) {
-        const newRowId = `row-${rowId + 1}`;
+      const newElId = `${landerTarget.includes("col") ? 'row' : 'column'}-${(landerTarget.includes("col") ? rowId : columnId) + 1}`
 
-        stack = {
-          type: "stack",
-          id: `stack-${stackId + 1}`,
-          parentId: newRowId,
-          content: [currentEl!]
-        }
-
-        currentEl!.parentId = stack.id;
-
-        row = {
-          type: "row",
-          id: newRowId,
-          parentId: targetElParent.parentId,
-          content: [
-            ...(landerTarget.includes("right")
-            ? [parentCopy, stack]
-            : [stack, parentCopy])
-          ]
-        };
-
-        parentCopy.parentId = row.id;
-
-        setRowId(rowId + 1);
+      stack = {
+        type: "stack",
+        id: `stack-${stackId + 1}`,
+        parentId: newElId,
+        content: [currentEl!]
       }
 
-      if (landerTarget.includes("row")) {
-        const newColId = `column-${columnId + 1}`;
+      currentEl!.parentId = stack.id;
 
-        stack = {
-          type: "stack",
-          id: `stack-${stackId + 1}`,
-          parentId: newColId,
-          content: [currentEl!]
-        }
+      newEl.content = [
+        ...((landerTarget.includes("right") || landerTarget.includes("bottom"))
+        ? [parentCopy, stack]
+        : [stack, parentCopy])
+      ]
 
-        currentEl!.parentId = stack.id;
+      landerTarget.includes("col") ? row = newEl : column = newEl;
 
-        column = {
-          type: "column",
-          id: newColId,
-          parentId: targetElParent.parentId,
-          content: [
-            ...(landerTarget.includes("bottom")
-            ? [parentCopy, stack]
-            : [stack, parentCopy])
-          ]
-        };
-
-        parentCopy.parentId = column.id;
-
-        setColumnId(rowId + 1);
-      }
+      parentCopy.parentId = landerTarget.includes("col") ? row!.id : column!.id;
 
       setStackId(stackId + 1);
     } else {
@@ -141,21 +113,18 @@ export const DropBoard = () => {
         setStackId(stackId + 1);
       }
 
-      const el: configType = {
-        type: landerTarget.includes("col") ? "row" : "column",
-        id: `${landerTarget.includes("col") ? 'row' : 'column'}-${(landerTarget.includes("col") ? rowId  : columnId)+ 1}`,
-        parentId: targetElParent.parentId,
-        content: [
-          ...stack ?
-            [...(landerTarget.includes("left") || landerTarget.includes("top")) ? [stack, parentCopy] : [parentCopy, stack]] :
-            [...(landerTarget.includes("left") || landerTarget.includes("top")) ? [draggingElParent, parentCopy] : [parentCopy, draggingElParent]]
-        ]
-      };
+      newEl.content = [
+        ...stack ?
+          [...(landerTarget.includes("left") || landerTarget.includes("top")) ? [stack, parentCopy] : [parentCopy, stack]] :
+          [...(landerTarget.includes("left") || landerTarget.includes("top")) ? [draggingElParent, parentCopy] : [parentCopy, draggingElParent]]
+      ];
 
-      landerTarget.includes("col") ? row = el : column = el;
-
-      landerTarget.includes("col") ? setRowId(rowId + 1) : setColumnId(columnId + 1);
+      landerTarget.includes("col") ? row = newEl : column = newEl;
     }
+
+    newEl.content.forEach(el => el.parentId = newEl.id);
+
+    landerTarget.includes("col") ? setRowId(rowId + 1) : setColumnId(columnId + 1);
 
     targetElParent.type = row ? row!.type : column!.type;
     targetElParent.id = row ? row!.id : column!.id;
