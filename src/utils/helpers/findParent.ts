@@ -2,7 +2,7 @@ import { componentType, configType } from "../types";
 
 export const findParent = function (
   arr: (configType | componentType)[],
-  targetElem: componentType
+  targetElem: configType | componentType
 ): configType | componentType | undefined {
   for (let i of arr) {
     if (i.id === targetElem.parentId) {
