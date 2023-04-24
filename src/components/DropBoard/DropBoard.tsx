@@ -75,12 +75,10 @@ export const DropBoard = () => {
     };
 
     if (targetElParent.type === "stack" && targetElParent.parentId === 'top-parent') {
-      const newElId = `${landerTarget.includes("col") ? 'row' : 'column'}-${(landerTarget.includes("col") ? rowId : columnId) + 1}`
-
       stack = {
         type: "stack",
         id: `stack-${stackId + 1}`,
-        parentId: newElId,
+        parentId: newEl.id,
         content: [currentEl!]
       }
 

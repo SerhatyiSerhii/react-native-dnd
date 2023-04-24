@@ -49,5 +49,11 @@ export const configFilter = function (arr: (configType | componentType)[]) {
           }
         }
       }
+
+      if ((arr[i] as configType)?.type === 'stack') {
+        (arr[i] as configType).id = `${(arr[i] as configType).type}-${(arr[i] as configType).content[0].id}`;
+
+        (arr[i] as configType).content.forEach(el => el.parentId = (arr[i] as configType).id);
+      }
     }
   };
